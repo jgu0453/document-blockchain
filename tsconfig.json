@@ -1,0 +1,13 @@
+﻿{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "types": ["hardhat"],
+    "outDir": "dist"
+  },
+  "include": ["hardhat.config.ts", "scripts", "test", "typechain-types"],
+  "exclude": ["node_modules"]
+}
