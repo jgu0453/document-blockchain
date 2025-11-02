@@ -1,4 +1,6 @@
-﻿const CONTRACT_ADDRESS = "0x8b4e10c530EC6d0850508Ad33Dc9535f5f04b720";
+﻿import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.11.1/dist/ethers.min.js";
+
+const CONTRACT_ADDRESS = "0x8b4e10c530EC6d0850508Ad33Dc9535f5f04b720";
 const CONTRACT_ABI = [
   "function registerDocument(bytes32 docId, bytes32 docHash, string uri)",
   "function verifyDocument(bytes32 docId, bytes32 docHash) view returns (bool)"
@@ -110,3 +112,5 @@ function shortError(error) {
   if (error?.message) return error.message.split("\n")[0];
   return "Unexpected error occurred.";
 }
+
+
