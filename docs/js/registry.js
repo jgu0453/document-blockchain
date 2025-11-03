@@ -46,20 +46,25 @@ async function ensureSignerContract() {
   if (!window.ethereum) {
     throw new Error("Please install MetaMask or an Ethereum-compatible wallet.");
   }
-
-  const accounts = await window.ethereum.request({ method: "eth_accounts" });
-  if (!accounts || accounts.length === 0) {
+  if (!isSessionConnected()) {
     throw new Error("Connect your wallet before registering documents.");
   }
 
-  provider = new ethers.BrowserProvider(window.ethereum);
-  signer = await provider.getSigner();
-  currentAddress = await signer.getAddress();
-  setSessionConnected(true);
-  signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-  readContract = signerContract;
-  notifyListeners();
-  return signerContract;
+  try {
+    provider = provider ?? new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    currentAddress = await signer.getAddress();
+    if (!currentAddress) {
+      throw new Error("Connect your wallet before registering documents.");
+    }
+    signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    readContract = signerContract;
+    notifyListeners();
+    return signerContract;
+  } catch (error) {
+    disconnectWallet();
+    throw error;
+  }
 }
 
 function notifyListeners() {
@@ -83,7 +88,7 @@ async function restoreWallet() {
       return null;
     }
     if (!signerContract) {
-      provider = new ethers.BrowserProvider(window.ethereum);
+      provider = provider ?? new ethers.BrowserProvider(window.ethereum);
       signer = await provider.getSigner();
       signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
       readContract = signerContract;
@@ -102,6 +107,8 @@ function disconnectWallet() {
   signer = null;
   signerContract = null;
   currentAddress = null;
+  provider = null;
+  readContract = null;
   setSessionConnected(false);
   notifyListeners();
 }
@@ -118,23 +125,35 @@ export function getCurrentAddress() {
 
 export function formatAddress(address) {
   if (!address) return "";
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
 export async function connectWallet() {
   if (!window.ethereum) {
     throw new Error("Please install MetaMask or an Ethereum-compatible wallet.");
   }
-  await window.ethereum.request({ method: "eth_requestAccounts" });
-  await ensureSignerContract();
-  return currentAddress;
+
+  try {
+    provider = provider ?? new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = await provider.getSigner();
+    currentAddress = await signer.getAddress();
+    signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    readContract = signerContract;
+    setSessionConnected(true);
+    notifyListeners();
+    return currentAddress;
+  } catch (error) {
+    disconnectWallet();
+    throw error;
+  }
 }
 
 export function bindWalletButton(button) {
   if (!button) return;
 
   const renderConnected = () => {
-    button.innerHTML = `<span class="wallet-status">Connected</span><span class="wallet-sub">Click to disconnect</span>`;
+    button.innerHTML = '<span class="wallet-status">Connected</span><span class="wallet-sub">Click to disconnect</span>';
     button.classList.add("connected");
   };
 
@@ -159,15 +178,12 @@ export function bindWalletButton(button) {
 
   button.addEventListener("click", async () => {
     try {
-      if (currentAddress) {
+      if (isSessionConnected() && currentAddress) {
         disconnectWallet();
         update(null);
         return;
       }
       const address = await connectWallet();
-      if (address) {
-        setSessionConnected(true);
-      }
       update(address);
     } catch (error) {
       console.error(error);
@@ -208,6 +224,10 @@ function normaliseHash(hash) {
 }
 
 export async function registerDocument({ docId, file, docHash, uri = "" }) {
+  if (!isSessionConnected() || !currentAddress) {
+    throw new Error("Connect your wallet to register a document.");
+  }
+
   const cleanId = docId?.trim();
   if (!cleanId) {
     throw new Error("Document ID is required.");
@@ -299,23 +319,44 @@ export function clearRememberedDocuments() {
 
 if (window.ethereum) {
   window.ethereum.on("accountsChanged", async (accounts) => {
-    signerContract = null;
-    signer = null;
-    currentAddress = accounts && accounts.length ? accounts[0] : null;
-    if (currentAddress && window.ethereum) {
-      provider = new ethers.BrowserProvider(window.ethereum);
-      signer = await provider.getSigner();
-      signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      readContract = signerContract;
+    if (!accounts || accounts.length === 0) {
+      disconnectWallet();
+      return;
     }
+
+    currentAddress = accounts[0];
+
+    if (isSessionConnected()) {
+      try {
+        provider = provider ?? new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
+        signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+        readContract = signerContract;
+      } catch (error) {
+        disconnectWallet();
+        console.error("Unable to refresh signer after account change:", error);
+        return;
+      }
+    } else {
+      signer = null;
+      signerContract = null;
+      provider = null;
+      readContract = null;
+    }
+
     notifyListeners();
   });
 }
 
-
-
-
 restoreWallet();
+
+
+
+
+
+
+
+
 
 
 
