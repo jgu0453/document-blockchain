@@ -1,4 +1,4 @@
-﻿import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.11.1/dist/ethers.min.js";
+import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.11.1/dist/ethers.min.js";
 
 const CONTRACT_ADDRESS = "0x8b4e10c530EC6d0850508Ad33Dc9535f5f04b720";
 const CONTRACT_ABI = [
@@ -88,7 +88,7 @@ export function getCurrentAddress() {
 
 export function formatAddress(address) {
   if (!address) return "";
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+  return `${address.slice(0, 6)}�${address.slice(-4)}`;
 }
 
 export async function connectWallet() {
@@ -112,6 +112,12 @@ export function bindWalletButton(button) {
       button.classList.remove("connected");
     }
   };
+  if (button.dataset.walletBound === "true") {
+    update(currentAddress);
+    return;
+  }
+  button.dataset.walletBound = "true";
+
 
   button.addEventListener("click", async () => {
     try {
