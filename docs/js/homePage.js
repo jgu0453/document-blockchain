@@ -1,5 +1,6 @@
 import { bindWalletButton } from "./registry.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  bindWalletButton(document.getElementById("walletButton"));
-});
+const setupWalletButton = () => bindWalletButton(document.getElementById("walletButton"));
+
+document.addEventListener("DOMContentLoaded", setupWalletButton);
+addEventListener("pageshow", setupWalletButton);

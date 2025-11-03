@@ -1,7 +1,10 @@
 import { bindWalletButton, registerDocument } from "./registry.js";
+const setupWalletButton = () => bindWalletButton(document.getElementById("walletButton"));
+
+addEventListener("pageshow", setupWalletButton);
 
 document.addEventListener("DOMContentLoaded", () => {
-  bindWalletButton(document.getElementById("walletButton"));
+  setupWalletButton();
 
   const docIdInput = document.getElementById("docIdInput");
   const fileInput = document.getElementById("fileInput");

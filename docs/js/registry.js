@@ -228,3 +228,6 @@ if (window.ethereum) {
 }
 
 
+
+
+restoreWallet();

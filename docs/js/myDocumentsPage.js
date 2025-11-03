@@ -6,9 +6,17 @@ import {
   removeRememberedDocument,
   verifyDocument
 } from "./registry.js";
+const setupWalletButton = () => bindWalletButton(document.getElementById("walletButton"));
+
+addEventListener("pageshow", setupWalletButton);
 
 document.addEventListener("DOMContentLoaded", () => {
-  bindWalletButton(document.getElementById("walletButton"));
+  setupWalletButton();
+
+addEventListener("pageshow", setupWalletButton);
+
+document.addEventListener("DOMContentLoaded", () => {
+  setupWalletButton();
 
   const tableBody = document.querySelector("#historyTable tbody");
   const resultBox = document.getElementById("verifyResult");
