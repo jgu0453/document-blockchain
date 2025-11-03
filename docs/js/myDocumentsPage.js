@@ -1,4 +1,4 @@
-﻿import {
+import {
   bindWalletButton,
   clearRememberedDocuments,
   getRememberedDocuments,
@@ -72,15 +72,15 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       if (result.match) {
-        statusEl.textContent = "✅ Blockchain record matches.";
+        statusEl.textContent = "? Blockchain record matches.";
         rememberDocument({ ...entry, verifiedAt: new Date().toISOString() });
         renderRows();
       } else {
-        statusEl.textContent = "⚠️ No matching record found.";
+        statusEl.textContent = "?? No matching record found.";
       }
     } catch (error) {
       console.error(error);
-      statusEl.textContent = `❌ ${error.message ?? error}`;
+      statusEl.textContent = `? ${error.message ?? error}`;
     }
   };
 
@@ -97,8 +97,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (entry.verifiedAt) {
       return `Verified ${new Date(entry.verifiedAt).toLocaleString()}`;
     }
-    return "—";
+    return "�";
   };
 
   renderRows();
 });
+

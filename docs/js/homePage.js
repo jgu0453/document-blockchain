@@ -4,3 +4,4 @@ const setupWalletButton = () => bindWalletButton(document.getElementById("wallet
 
 document.addEventListener("DOMContentLoaded", setupWalletButton);
 addEventListener("pageshow", setupWalletButton);
+

@@ -2,8 +2,6 @@
 
 const setupWalletButton = () => bindWalletButton(document.getElementById("walletButton"));
 
-addEventListener("pageshow", setupWalletButton);
-
 document.addEventListener("DOMContentLoaded", () => {
   setupWalletButton();
 
