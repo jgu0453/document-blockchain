@@ -1,10 +1,15 @@
-import { bindWalletButton, rememberDocument, verifyDocument } from "./registry.js";
+﻿import { bindWalletButton, rememberDocument, verifyDocument } from "./registry.js";
+
 const setupWalletButton = () => bindWalletButton(document.getElementById("walletButton"));
 
 addEventListener("pageshow", setupWalletButton);
 
 document.addEventListener("DOMContentLoaded", () => {
   setupWalletButton();
+
+  const docIdInput = document.getElementById("docIdInput");
+  const methodSelect = document.getElementById("methodSelect");
+  const fileInputGroup = document.getElementById("fileInputGroup");
   const hashInputGroup = document.getElementById("hashInputGroup");
   const fileInput = document.getElementById("fileInput");
   const hashInput = document.getElementById("hashInput");
@@ -49,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const providedHash = hashInput.value.trim();
 
     resultSection.classList.remove("hidden");
-    statusEl.textContent = "Verifying document…";
+    statusEl.textContent = "Verifying document...";
     detailsEl.innerHTML = "";
 
     try {
@@ -97,5 +102,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
-

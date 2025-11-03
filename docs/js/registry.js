@@ -1,4 +1,4 @@
-import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.11.1/dist/ethers.min.js";
+﻿import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.11.1/dist/ethers.min.js";
 
 const CONTRACT_ADDRESS = "0x8b4e10c530EC6d0850508Ad33Dc9535f5f04b720";
 const CONTRACT_ABI = [
@@ -52,6 +52,31 @@ function notifyListeners() {
   }
 }
 
+async function restoreWallet() {
+  if (!window.ethereum) {
+    return null;
+  }
+  try {
+    const accounts = await window.ethereum.request({ method: "eth_accounts" });
+    if (!accounts || accounts.length === 0) {
+      return null;
+    }
+    if (!signerContract) {
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
+      signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+      readContract = signerContract;
+    }
+    currentAddress = accounts[0];
+    notifyListeners();
+    return currentAddress;
+  } catch (error) {
+    console.error("Unable to restore wallet:", error);
+    return null;
+  }
+}
+
+
 export function onWalletChange(callback) {
   listeners.add(callback);
   return () => listeners.delete(callback);
@@ -63,7 +88,7 @@ export function getCurrentAddress() {
 
 export function formatAddress(address) {
   if (!address) return "";
-  return `${address.slice(0, 6)}?${address.slice(-4)}`;
+  return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
 export async function connectWallet() {
@@ -231,3 +256,6 @@ if (window.ethereum) {
 
 
 restoreWallet();
+
+
+

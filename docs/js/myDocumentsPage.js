@@ -1,4 +1,4 @@
-import {
+﻿import {
   bindWalletButton,
   clearRememberedDocuments,
   getRememberedDocuments,
@@ -6,12 +6,8 @@ import {
   removeRememberedDocument,
   verifyDocument
 } from "./registry.js";
+
 const setupWalletButton = () => bindWalletButton(document.getElementById("walletButton"));
-
-addEventListener("pageshow", setupWalletButton);
-
-document.addEventListener("DOMContentLoaded", () => {
-  setupWalletButton();
 
 addEventListener("pageshow", setupWalletButton);
 
@@ -62,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const handleVerify = async (entry) => {
     resultBox.classList.remove("hidden");
-    statusEl.textContent = "Verifying document…";
+    statusEl.textContent = "Verifying document...";
     detailsEl.innerHTML = "";
 
     try {
