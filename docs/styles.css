@@ -91,6 +91,9 @@ main.container {
 }
 
 .wallet-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   background: #00a5db;
   color: #ffffff;
   border: none;
@@ -100,6 +103,25 @@ main.container {
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
+.wallet-button.connected {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.wallet-button .wallet-status {
+  display: block;
+  font-weight: 600;
+}
+
+.wallet-button .wallet-sub {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
 
 .wallet-button:hover {
   transform: translateY(-1px);

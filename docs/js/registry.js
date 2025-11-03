@@ -7,6 +7,7 @@ const CONTRACT_ABI = [
 ];
 
 const STORAGE_KEY = "doc-registry:documents";
+const SESSION_CONNECTED_KEY = "doc-registry:connected";
 
 let provider;
 let signer;
@@ -14,6 +15,19 @@ let signerContract;
 let readContract;
 let currentAddress = null;
 const listeners = new Set();
+
+function isSessionConnected() {
+  return sessionStorage.getItem(SESSION_CONNECTED_KEY) === "true";
+}
+
+function setSessionConnected(value) {
+  if (value) {
+    sessionStorage.setItem(SESSION_CONNECTED_KEY, "true");
+  } else {
+    sessionStorage.removeItem(SESSION_CONNECTED_KEY);
+  }
+}
+
 
 function getDefaultProvider() {
   if (!readContract) {
@@ -36,6 +50,7 @@ async function ensureSignerContract() {
   await provider.send("eth_requestAccounts", []);
   signer = await provider.getSigner();
   currentAddress = await signer.getAddress();
+  setSessionConnected(true);
   signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
   readContract = signerContract;
   notifyListeners();
@@ -53,12 +68,13 @@ function notifyListeners() {
 }
 
 async function restoreWallet() {
-  if (!window.ethereum) {
+  if (!window.ethereum || !isSessionConnected()) {
     return null;
   }
   try {
     const accounts = await window.ethereum.request({ method: "eth_accounts" });
     if (!accounts || accounts.length === 0) {
+      setSessionConnected(false);
       return null;
     }
     if (!signerContract) {
@@ -72,8 +88,17 @@ async function restoreWallet() {
     return currentAddress;
   } catch (error) {
     console.error("Unable to restore wallet:", error);
+    setSessionConnected(false);
     return null;
   }
+}
+
+function disconnectWallet() {
+  signer = null;
+  signerContract = null;
+  currentAddress = null;
+  setSessionConnected(false);
+  notifyListeners();
 }
 
 
@@ -103,25 +128,41 @@ export async function connectWallet() {
 export function bindWalletButton(button) {
   if (!button) return;
 
+  const renderConnected = () => {
+    button.innerHTML = `<span class="wallet-status">Connected</span><span class="wallet-sub">Click to disconnect</span>`;
+    button.classList.add("connected");
+  };
+
+  const renderDisconnected = () => {
+    button.textContent = "Connect Wallet";
+    button.classList.remove("connected");
+  };
+
   const update = (address) => {
     if (address) {
-      button.textContent = formatAddress(address);
-      button.classList.add("connected");
+      renderConnected();
     } else {
-      button.textContent = "Connect Wallet";
-      button.classList.remove("connected");
+      renderDisconnected();
     }
   };
+
   if (button.dataset.walletBound === "true") {
     update(currentAddress);
     return;
   }
   button.dataset.walletBound = "true";
 
-
   button.addEventListener("click", async () => {
     try {
+      if (currentAddress) {
+        disconnectWallet();
+        update(null);
+        return;
+      }
       const address = await connectWallet();
+      if (address) {
+        setSessionConnected(true);
+      }
       update(address);
     } catch (error) {
       console.error(error);
@@ -131,6 +172,14 @@ export function bindWalletButton(button) {
 
   onWalletChange(update);
   update(currentAddress);
+
+  if (!currentAddress && isSessionConnected()) {
+    restoreWallet().then((address) => {
+      if (address) {
+        update(address);
+      }
+    });
+  }
 }
 
 export async function hashFile(file) {
