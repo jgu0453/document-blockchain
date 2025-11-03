@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Credential</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="triton-nav">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="verify.html" class="active">Verify a Document</a></li>
+      <li><a href="my_documents.html">My Documents</a></li>
+      <li><a href="faculty_staff.html">Faculty/Staff</a></li>
+      <li class="wallet">
+        <button id="walletButton" class="wallet-button">Connect Wallet</button>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <h1>Verify a Document</h1>
+    <p>
+      Provide the document ID and either upload the file or paste a known file hash. The application recomputes the
+      SHA-256 fingerprint locally and compares it to the on-chain record.
+    </p>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="docIdInput">Document ID</label>
+        <input type="text" id="docIdInput" placeholder="e.g., transcript-2025" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="methodSelect">Verification Method</label>
+        <select id="methodSelect">
+          <option value="">-- Select a Method --</option>
+          <option value="file">Upload Document</option>
+          <option value="hash">Enter Document Hash</option>
+        </select>
+      </div>
+
+      <div id="fileInputGroup" class="form-group hidden">
+        <label for="fileInput">Document File</label>
+        <input type="file" id="fileInput" />
+      </div>
+
+      <div id="hashInputGroup" class="form-group hidden">
+        <label for="hashInput">Document Hash (SHA-256)</label>
+        <input type="text" id="hashInput" placeholder="0x…" autocomplete="off" />
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button id="verifyBtn" class="uc-button primary">Verify Document</button>
+      <button id="clearBtn" class="uc-button subtle">Clear</button>
+    </div>
+
+    <section id="result" class="result-box hidden" aria-live="polite">
+      <h2>Verification Result</h2>
+      <p id="status">Verifying…</p>
+      <dl id="details"></dl>
+    </section>
+  </main>
+
+  <script type="module" src="js/verifyPage.js"></script>
+</body>
+</html>

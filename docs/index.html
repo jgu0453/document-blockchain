@@ -1,50 +1,59 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document Verification Registry</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UC Verifiable Credentials</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main>
-    <header>
-      <h1>Document Verification Registry</h1>
-      <button id="connectButton">Connect Wallet</button>
-    </header>
+  <nav class="triton-nav">
+    <ul>
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="verify.html">Verify a Document</a></li>
+      <li><a href="my_documents.html">My Documents</a></li>
+      <li><a href="faculty_staff.html">Faculty/Staff</a></li>
+      <li class="wallet">
+        <button id="walletButton" class="wallet-button">Connect Wallet</button>
+      </li>
+    </ul>
+  </nav>
 
-    <section>
-      <h2>Register Document</h2>
-      <form id="registerForm">
-        <label>Document ID
-          <input type="text" id="docId" placeholder="e.g. passport-123" required>
-        </label>
-        <label>Document File
-          <input type="file" id="docFile" required>
-        </label>
-        <label>Public URI (optional)
-          <input type="url" id="docUri" placeholder="ipfs://CID or https://...">
-        </label>
-        <button type="submit">Register</button>
-      </form>
-      <p id="registerStatus" class="status"></p>
+  <main class="container home">
+    <h1>UC Verifiable Credentials</h1>
+    <p class="lead">
+      Demonstration of a blockchain-backed verification system for University of California documents.
+      Register document fingerprints, confirm authenticity instantly, and keep records tamper-proof without
+      uploading personal data.
+    </p>
+
+    <section class="home-section">
+      <h2>How It Works</h2>
+      <ol>
+        <li>Connect an Ethereum wallet (MetaMask or compatible) using the button above.</li>
+        <li>Ensure your wallet is on the <strong>Sepolia</strong> test network and funded with test ETH.</li>
+        <li>Faculty can register document hashes; anyone can verify by uploading a file or supplying a hash.</li>
+      </ol>
     </section>
 
-    <section>
-      <h2>Verify Document</h2>
-      <form id="verifyForm">
-        <label>Document ID
-          <input type="text" id="verifyDocId" placeholder="matching document id" required>
-        </label>
-        <label>Document File
-          <input type="file" id="verifyFile" required>
-        </label>
-        <button type="submit">Verify</button>
-      </form>
-      <p id="verifyStatus" class="status"></p>
+    <section class="home-section quick-actions">
+      <h2>Get Started</h2>
+      <div class="action-grid">
+        <a class="uc-button primary" href="verify.html">Verify a Document</a>
+        <a class="uc-button" href="faculty_staff.html">Register a Document</a>
+        <a class="uc-button" href="my_documents.html">Review My Documents</a>
+      </div>
+    </section>
+
+    <section class="home-section info">
+      <h2>Why Blockchain?</h2>
+      <p>
+        We store only SHA-256 hashes of documents on-chain, creating immutable proofs of existence. Anyone with the
+        original file can recompute its fingerprint and verify ownership, while the contents remain private.
+      </p>
     </section>
   </main>
-  <script type="module" src="main.js"></script>
+
+  <script type="module" src="js/homePage.js"></script>
 </body>
 </html>
-

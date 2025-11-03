@@ -1,4 +1,4 @@
-ï»¿# Document Verification Blockchain
+# Document Verification Blockchain
 
 A minimal Ethereum project that anchors document hashes on-chain and lets anyone verify them.
 
@@ -41,7 +41,7 @@ Then run:
 npm run deploy:sepolia
 ```
 
-The script prints the contract address youâ€™ll reuse in frontends or APIs.
+The script prints the contract address you'll reuse in frontends or APIs.
 
 ## Contract Highlights
 
@@ -53,11 +53,18 @@ Document IDs can be any unique string hashed off-chain (for example `sha256(file
 
 ## GitHub Pages Frontend
 
-This repository includes a static interface in the `docs/` folder that GitHub Pages can serve.
+This repository includes a multi-page static interface under `docs/` that GitHub Pages can host.
 
 1. Deploy the smart contract (local or Sepolia) and copy the deployed address.
-2. Edit `docs/main.js` and replace `REPLACE_WITH_DEPLOYED_ADDRESS` with the actual contract address.
+2. Update `docs/js/registry.js` with the deployed contract address if it changes.
 3. Commit and push. In your repository settings, set GitHub Pages to serve from the `docs/` directory.
-4. Open the published URL, connect MetaMask (ensure it points to the same network you deployed on), and register/verify documents directly from the browser.
+4. Open the published URL, connect an Ethereum wallet (MetaMask or equivalent), switch to Sepolia, and interact with the app.
 
-The frontend hashes documents locally in the browser (SHA-256) before interacting with the smart contract; no file contents leave the client.
+### Available Pages
+
+- **Home** — overview and quick links.
+- **Verify a Document** — upload a file or paste a pre-computed hash to check against the on-chain fingerprint.
+- **Faculty/Staff** — register new documents (hashes are computed locally; only SHA-256 digests are stored on-chain).
+- **My Documents** — client-side history (stored in `localStorage`) of recently registered or verified items for quick re-checks.
+
+All hashing happens in the browser via the Web Crypto API. No document content leaves the client; only hashes and transaction metadata interact with the blockchain.

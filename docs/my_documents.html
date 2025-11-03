@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Documents</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="triton-nav">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="verify.html">Verify a Document</a></li>
+      <li><a href="my_documents.html" class="active">My Documents</a></li>
+      <li><a href="faculty_staff.html">Faculty/Staff</a></li>
+      <li class="wallet">
+        <button id="walletButton" class="wallet-button">Connect Wallet</button>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <h1>Recent Activity</h1>
+    <p>
+      Your browser keeps a private record of documents you register or verify. Use the controls below to re-run
+      verification or remove entries from this device.
+    </p>
+
+    <section id="historySection" class="history-section">
+      <header class="history-header">
+        <h2>Stored Documents</h2>
+        <button id="clearHistoryBtn" class="uc-button subtle">Clear All</button>
+      </header>
+
+      <table id="historyTable" class="doc-table">
+        <thead>
+          <tr>
+            <th>Document ID</th>
+            <th>Hash</th>
+            <th>Last Action</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="placeholder">
+            <td colspan="4">No documents stored yet. Register or verify a document to see it here.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="verifyResult" class="result-box hidden" aria-live="polite">
+      <h2>Verification Result</h2>
+      <p id="verifyStatus"></p>
+      <dl id="verifyDetails"></dl>
+    </section>
+  </main>
+
+  <script type="module" src="js/myDocumentsPage.js"></script>
+</body>
+</html>

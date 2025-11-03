@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Verification Registry</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Document Verification Registry</h1>
+      <button id="connectButton">Connect Wallet</button>
+    </header>
+
+    <section>
+      <h2>Register Document</h2>
+      <form id="registerForm">
+        <label>Document ID
+          <input type="text" id="docId" placeholder="e.g. passport-123" required>
+        </label>
+        <label>Document File
+          <input type="file" id="docFile" required>
+        </label>
+        <label>Public URI (optional)
+          <input type="url" id="docUri" placeholder="ipfs://CID or https://...">
+        </label>
+        <button type="submit">Register</button>
+      </form>
+      <p id="registerStatus" class="status"></p>
+    </section>
+
+    <section>
+      <h2>Verify Document</h2>
+      <form id="verifyForm">
+        <label>Document ID
+          <input type="text" id="verifyDocId" placeholder="matching document id" required>
+        </label>
+        <label>Document File
+          <input type="file" id="verifyFile" required>
+        </label>
+        <button type="submit">Verify</button>
+      </form>
+      <p id="verifyStatus" class="status"></p>
+    </section>
+  </main>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
+

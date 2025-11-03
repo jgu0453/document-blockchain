@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register Document</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="triton-nav">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="verify.html">Verify a Document</a></li>
+      <li><a href="my_documents.html">My Documents</a></li>
+      <li><a href="faculty_staff.html" class="active">Faculty/Staff</a></li>
+      <li class="wallet">
+        <button id="walletButton" class="wallet-button">Connect Wallet</button>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <h1>Register a Document</h1>
+    <p>
+      Issue a verifiable credential by registering the document fingerprint on-chain. Only the SHA-256 hash is stored;
+      the file never leaves your device.
+    </p>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="docIdInput">Document ID</label>
+        <input type="text" id="docIdInput" placeholder="e.g., degree-2025-A12345678" autocomplete="off" />
+        <small>Use a stable identifier (PID + document type works well).</small>
+      </div>
+
+      <div class="form-group">
+        <label for="fileInput">Document File</label>
+        <input type="file" id="fileInput" />
+        <small>Supported formats depend on the browser.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="uriInput">Optional Public URI</label>
+        <input type="url" id="uriInput" placeholder="https://…" autocomplete="off" />
+        <small>Link to internal storage, IPFS, or supplementary metadata.</small>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button id="registerBtn" class="uc-button primary">Register Document</button>
+      <button id="resetBtn" class="uc-button subtle">Clear</button>
+    </div>
+
+    <section id="result" class="result-box hidden" aria-live="polite">
+      <h2>Registration Status</h2>
+      <p id="status">Awaiting submission…</p>
+      <dl id="details"></dl>
+    </section>
+  </main>
+
+  <script type="module" src="js/facultyPage.js"></script>
+</body>
+</html>
