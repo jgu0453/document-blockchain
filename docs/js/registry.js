@@ -63,12 +63,16 @@ export function getCurrentAddress() {
 
 export function formatAddress(address) {
   if (!address) return "";
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+  return `${address.slice(0, 6)}?${address.slice(-4)}`;
 }
 
 export async function connectWallet() {
-  const contract = await ensureSignerContract();
-  return await contract.signer.getAddress();
+  await ensureSignerContract();
+  if (!currentAddress && signer) {
+    currentAddress = await signer.getAddress();
+    notifyListeners();
+  }
+  return currentAddress;
 }
 
 export function bindWalletButton(button) {
@@ -222,4 +226,5 @@ if (window.ethereum) {
     notifyListeners();
   });
 }
+
 
