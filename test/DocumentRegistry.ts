@@ -3,13 +3,10 @@ import { ethers } from "hardhat";
 
 describe("DocumentRegistry", () => {
   it("registers and verifies documents", async () => {
-    const [admin, issuer, outsider] = await ethers.getSigners();
+    const [issuer, outsider] = await ethers.getSigners();
 
-    const registry = await ethers.deployContract("DocumentRegistry", [admin.address]);
+    const registry = await ethers.deployContract("DocumentRegistry");
     await registry.waitForDeployment();
-
-    const issuerRole = await registry.ISSUER_ROLE();
-    await registry.connect(admin).grantRole(issuerRole, issuer.address);
 
     const docId = ethers.id("passport-123");
     const docHash = ethers.id("original-file");
@@ -23,11 +20,7 @@ describe("DocumentRegistry", () => {
     expect(await registry.verifyDocument(docId, docHash)).to.equal(true);
     expect(await registry.verifyDocument(docId, ethers.id("tampered"))).to.equal(false);
 
-    await expect(
-      registry.connect(outsider).registerDocument(docId, docHash, "")
-    ).to.be.revertedWithCustomError(registry, "AccessControlUnauthorizedAccount").withArgs(
-      outsider.address,
-      issuerRole
-    );
+    await expect(registry.connect(outsider).registerDocument(docId, docHash, ""))
+      .to.be.revertedWith("Document already registered");
   });
 });

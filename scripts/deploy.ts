@@ -1,10 +1,10 @@
-﻿import { ethers } from "hardhat";
+import { ethers } from "hardhat";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
   console.log(`Deploying with ${deployer.address}`);
 
-  const registry = await ethers.deployContract("DocumentRegistry", [deployer.address]);
+  const registry = await ethers.deployContract("DocumentRegistry");
   await registry.waitForDeployment();
 
   console.log(`DocumentRegistry deployed to ${await registry.getAddress()}`);

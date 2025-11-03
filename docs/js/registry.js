@@ -1,6 +1,6 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.11.1/dist/ethers.min.js";
 
-const CONTRACT_ADDRESS = "0x8b4e10c530EC6d0850508Ad33Dc9535f5f04b720";
+const CONTRACT_ADDRESS = "0xE8012eB7fA14Db7e83Abfd96ac6fD0D58292AB03";
 const CONTRACT_ABI = [
   "function registerDocument(bytes32 docId, bytes32 docHash, string uri)",
   "function verifyDocument(bytes32 docId, bytes32 docHash) view returns (bool)"
@@ -46,8 +46,13 @@ async function ensureSignerContract() {
   if (!window.ethereum) {
     throw new Error("Please install MetaMask or an Ethereum-compatible wallet.");
   }
+
+  const accounts = await window.ethereum.request({ method: "eth_accounts" });
+  if (!accounts || accounts.length === 0) {
+    throw new Error("Connect your wallet before registering documents.");
+  }
+
   provider = new ethers.BrowserProvider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
   signer = await provider.getSigner();
   currentAddress = await signer.getAddress();
   setSessionConnected(true);
@@ -117,11 +122,11 @@ export function formatAddress(address) {
 }
 
 export async function connectWallet() {
-  await ensureSignerContract();
-  if (!currentAddress && signer) {
-    currentAddress = await signer.getAddress();
-    notifyListeners();
+  if (!window.ethereum) {
+    throw new Error("Please install MetaMask or an Ethereum-compatible wallet.");
   }
+  await window.ethereum.request({ method: "eth_requestAccounts" });
+  await ensureSignerContract();
   return currentAddress;
 }
 

@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+// import "@openzeppelin/contracts/access/AccessControl.sol";
+
 contract DocumentRegistry {
+    // bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
+
     struct Document {
         bytes32 docHash;
         address issuer;
@@ -18,8 +22,14 @@ contract DocumentRegistry {
         string uri
     );
 
+    // constructor(address admin) {
+    //     _grantRole(DEFAULT_ADMIN_ROLE, admin);
+    //     _grantRole(ISSUER_ROLE, admin);
+    // }
+
     function registerDocument(bytes32 docId, bytes32 docHash, string calldata uri)
         external
+        // onlyRole(ISSUER_ROLE)
     {
         require(documents[docId].issuedAt == 0, "Document already registered");
 

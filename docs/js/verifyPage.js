@@ -85,18 +85,18 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       if (result.match) {
-        statusEl.textContent = "? Blockchain record matches.";
+        statusEl.textContent = "Blockchain record matches.";
         rememberDocument({
           docId: result.docId,
           docHash: result.docHash,
           verifiedAt: new Date().toISOString()
         });
       } else {
-        statusEl.textContent = "?? No matching record found on-chain.";
+        statusEl.textContent = "No matching record found on-chain.";
       }
     } catch (error) {
       console.error(error);
-      statusEl.textContent = `? ${error.message ?? error}`;
+      statusEl.textContent = `Error: ${error.message ?? error}`;
     }
   });
 });
