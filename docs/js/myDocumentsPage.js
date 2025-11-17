@@ -52,7 +52,7 @@ function renderDocuments() {
   documents.forEach((item, index) => {
     const issued = item.issued_at ? new Date(item.issued_at).toLocaleString() : "-";
     const txLink = item.tx_hash
-      ? `<a href="https://sepolia.etherscan.io/tx/${item.tx_hash}" target="_blank" rel="noopener">Tx</a>`
+      ? `<a href="https://sepolia.etherscan.io/tx/${item.tx_hash}" target="_blank" rel="noopener">Transaction</a>`
       : "";
     const downloadLink = item.file_url
       ? `<a href="${item.file_url}" target="_blank" rel="noopener">Download</a>`
