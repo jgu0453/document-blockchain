@@ -1,5 +1,5 @@
-﻿import { rememberDocument, verifyDocument, bindWalletButton } from "./registry.js";
-import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
+﻿import { rememberDocument, verifyDocument } from "./registry.js";
+import { getSessionUser, signOut } from "./supabaseClient.js";
 
 const walletButton = document.getElementById("walletButton");
 const navLogout = document.getElementById("nav-logout");
@@ -12,28 +12,6 @@ function hideWallet() {
   if (walletButton) {
     walletButton.classList.add("hidden", "disabled");
     walletButton.disabled = true;
-  }
-}
-
-function enableWallet() {
-  if (walletButton) {
-    walletButton.classList.remove("hidden", "disabled");
-    walletButton.disabled = false;
-    bindWalletButton(walletButton);
-  }
-}
-
-async function setupUserContext() {
-  const user = await getSessionUser();
-  if (!user) {
-    hideWallet();
-    return;
-  }
-  const role = getUserRole(user);
-  if (role === "admin") {
-    enableWallet();
-  } else {
-    hideWallet();
   }
 }
 
@@ -72,11 +50,17 @@ verifyForm?.addEventListener("submit", async (e) => {
   }
 });
 
+navLogout?.classList.add("uc-button", "secondary");
 navLogout?.addEventListener("click", async () => {
   await signOut();
   window.location.href = "signin.html";
 });
 
+hideWallet();
+
 (async () => {
-  await setupUserContext();
+  const user = await getSessionUser();
+  if (!user) {
+    window.location.href = "signin.html";
+  }
 })();

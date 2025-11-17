@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Request Document</title>
   <link rel="stylesheet" href="styles.css" />
-  
+  <script src="supabase-config.js"></script>
 </head>
 <body class="page request-page">
   <nav class="triton-nav">
@@ -22,15 +22,13 @@
 
   <main class="content container">
     <section class="card">
-      <h2>Request / Check a Document</h2><p class="muted">Enter the document ID and hash to check whether it is recorded on-chain.</p>
+      <h2>Request / Download Document</h2>
+      <p class="muted">Enter the document ID to fetch the stored file from the database. No wallet needed.</p>
       <form id="request-form">
         <label>Document ID
           <input name="docId" required placeholder="e.g., degree-2025-A12345678">
         </label>
-        <label>Document Hash
-          <input name="docHash" required placeholder="0x... (SHA-256)">
-        </label>
-        <button type="submit" class="uc-button primary">Check</button>
+        <button type="submit" class="uc-button primary">Fetch</button>
       </form>
       <div id="request-message" class="status"></div>
     </section>
@@ -44,5 +42,3 @@
   <script type="module" src="js/requestPage.js"></script>
 </body>
 </html>
-
-
