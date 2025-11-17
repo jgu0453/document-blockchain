@@ -31,7 +31,7 @@ form?.addEventListener("submit", async (e) => {
 });
 
 (async () => {
-  // Clear any remembered session so users always sign in after reopening
+  // Clear any existing session when loading sign-in so users must sign in each visit
   if (supabase) {
     await signOut();
   }

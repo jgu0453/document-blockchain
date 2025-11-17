@@ -90,9 +90,7 @@ main.container {
   color: #08365c;
 }
 
-.triton-nav li.wallet {
-  margin-left: auto;
-}
+
 
 .wallet-button {
   display: inline-flex;
@@ -312,14 +310,16 @@ input[type="file"] {
 
 @media (max-width: 768px) {
   .triton-nav ul {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0.75rem;
-  }
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+}
 
-  .triton-nav li.wallet {
-    margin-left: 0;
-  }
+  
 
   main.container {
     width: 92vw;
@@ -370,4 +370,5 @@ input[type="file"] {
 .auth-right .secondary {
   margin: 0;
 }
+
 

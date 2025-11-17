@@ -1,24 +1,26 @@
-﻿import { supabase, signIn, signOut, getSessionUser, onAuthChange, getUserRole } from "./supabaseClient.js";
+﻿import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
 import { createRequest, listMyRequests } from "./requestsApi.js";
 import { bindWalletButton } from "./registry.js";
-
-const loginBtn = document.getElementById("login-btn");
-const logoutBtn = document.getElementById("nav-logout") || document.getElementById("logout-btn");
-const emailInput = document.getElementById("login-email");
-const passwordInput = document.getElementById("login-password");
-const authStatus = document.getElementById("auth-status");
 
 const form = document.getElementById("request-form");
 const messageEl = document.getElementById("request-message");
 const myRequestsEl = document.getElementById("my-requests");
-
 const walletButton = document.getElementById("walletButton");
-const navLinks = document.getElementById("nav-links");
+const navLogout = document.getElementById("nav-logout");
 
-function showStatus(el, text, kind = "") {
-  if (!el) return;
-  el.textContent = text;
-  el.className = `status ${kind}`.trim();
+function hideWallet() {
+  if (walletButton) {
+    walletButton.classList.add("hidden", "disabled");
+    walletButton.disabled = true;
+  }
+}
+
+function enableWallet() {
+  if (walletButton) {
+    walletButton.classList.remove("hidden", "disabled");
+    walletButton.disabled = false;
+    bindWalletButton(walletButton);
+  }
 }
 
 async function ensureSignedIn() {
@@ -28,34 +30,6 @@ async function ensureSignedIn() {
     return null;
   }
   return user;
-}
-
-function configureNavForRole(role) {
-  if (!navLinks) return;
-  if (role === "admin") {
-    navLinks.innerHTML = `
-      <li><a href="admin.html">Profile</a></li>
-      <li><a href="faculty_staff.html">Register</a></li>
-      <li><a href="verify.html">Verify</a></li>
-      <li><a href="request.html" class="active">Request</a></li>
-    `;
-    if (walletButton) {
-      walletButton.classList.remove("hidden", "disabled");
-      walletButton.disabled = false;
-      bindWalletButton(walletButton);
-    }
-  } else {
-    navLinks.innerHTML = `
-      <li><a href="signin.html">Sign In</a></li>
-      <li><a href="my_documents.html">Profile</a></li>
-      <li><a href="request.html" class="active">Request</a></li>
-      <li><a href="verify.html">Verify</a></li>
-    `;
-    if (walletButton) {
-      walletButton.classList.add("hidden");
-      walletButton.disabled = true;
-    }
-  }
 }
 
 async function refreshRequests() {
@@ -84,38 +58,6 @@ async function refreshRequests() {
   }
 }
 
-function bindAuth() {
-  loginBtn?.addEventListener("click", async () => {
-    try {
-      await signIn(emailInput.value, passwordInput.value);
-      showStatus(authStatus, "Signed in", "success");
-      const user = await ensureSignedIn();
-      if (user) {
-        configureNavForRole(getUserRole(user));
-        refreshRequests();
-      }
-    } catch (err) {
-      showStatus(authStatus, err.message || err, "error");
-    }
-  });
-
-  logoutBtn?.addEventListener("click", async () => {
-    await signOut();
-    showStatus(authStatus, "Signed out", "muted");
-    myRequestsEl.innerHTML = "";
-    window.location.href = "signin.html";
-  });
-
-  onAuthChange((user) => {
-    if (user) {
-      showStatus(authStatus, `Signed in as ${user.email}`, "success");
-      configureNavForRole(getUserRole(user));
-    } else {
-      showStatus(authStatus, "Not signed in", "muted");
-    }
-  });
-}
-
 function bindForm() {
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -123,33 +65,44 @@ function bindForm() {
     const docType = data.get("docType")?.toString().trim();
     const notes = data.get("notes")?.toString().trim() || null;
     if (!docType) {
-      showStatus(messageEl, "Document type is required", "error");
+      messageEl.textContent = "Document type is required";
+      messageEl.className = "status error";
       return;
     }
     try {
       await createRequest({ docType, notes });
       form.reset();
-      showStatus(messageEl, "Request submitted", "success");
+      messageEl.textContent = "Request submitted";
+      messageEl.className = "status success";
       refreshRequests();
     } catch (err) {
-      showStatus(messageEl, err.message || err, "error");
+      messageEl.textContent = err.message || err;
+      messageEl.className = "status error";
     }
   });
 }
 
 async function init() {
   if (!supabase) {
-    showStatus(authStatus, "Supabase config missing (add supabase-config.js)", "error");
+    messageEl.textContent = "Supabase config missing";
+    messageEl.className = "status error";
     return;
   }
   const user = await ensureSignedIn();
   if (!user) return;
   const role = getUserRole(user);
-  configureNavForRole(role);
-  showStatus(authStatus, `Signed in as ${user.email}`, "success");
-  bindAuth();
+  if (role === "admin") {
+    enableWallet();
+  } else {
+    hideWallet();
+  }
   bindForm();
   refreshRequests();
+  navLogout?.classList.add("uc-button", "secondary");
+  navLogout?.addEventListener("click", async () => {
+    await signOut();
+    window.location.href = "signin.html";
+  });
 }
 
 init();

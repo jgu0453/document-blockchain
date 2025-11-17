@@ -1,46 +1,39 @@
 ﻿import { rememberDocument, verifyDocument, bindWalletButton } from "./registry.js";
 import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
 
-const walletButtonId = "walletButton";
-const fileInputId = "fileInput";
-const docIdInputId = "docIdInput";
-const hashInputId = "hashInput";
+const walletButton = document.getElementById("walletButton");
+const navLogout = document.getElementById("nav-logout");
 const verifyForm = document.getElementById("verifyForm");
 const statusEl = document.getElementById("status");
 const detailsEl = document.getElementById("details");
 const resultSection = document.getElementById("result");
-const navLogout = document.getElementById("nav-logout");
-const navLinks = document.getElementById("nav-links");
-let walletBound = false;
 
-function setAdminNav() {
-  if (!navLinks) return;
-  navLinks.innerHTML = `
-    <li><a href="admin.html">Profile</a></li>
-    <li><a href="faculty_staff.html">Register</a></li>
-    <li><a href="verify.html" class="active">Verify</a></li>
-    <li><a href="request.html">Request</a></li>
-  `;
-  const btn = document.getElementById(walletButtonId);
-  if (btn && !walletBound) {
-    btn.classList.remove("hidden", "disabled");
-    btn.disabled = false;
-    bindWalletButton(btn);
-    walletBound = true;
+function hideWallet() {
+  if (walletButton) {
+    walletButton.classList.add("hidden", "disabled");
+    walletButton.disabled = true;
   }
 }
 
-function setStudentNav() {
-  if (!navLinks) return;
-  navLinks.innerHTML = `
-    <li><a href="my_documents.html">Profile</a></li>
-    <li><a href="request.html">Request</a></li>
-    <li><a href="verify.html" class="active">Verify</a></li>
-  `;
-  const btn = document.getElementById(walletButtonId);
-  if (btn) {
-    btn.classList.add("hidden", "disabled");
-    btn.disabled = true;
+function enableWallet() {
+  if (walletButton) {
+    walletButton.classList.remove("hidden", "disabled");
+    walletButton.disabled = false;
+    bindWalletButton(walletButton);
+  }
+}
+
+async function setupUserContext() {
+  const user = await getSessionUser();
+  if (!user) {
+    hideWallet();
+    return;
+  }
+  const role = getUserRole(user);
+  if (role === "admin") {
+    enableWallet();
+  } else {
+    hideWallet();
   }
 }
 
@@ -53,12 +46,12 @@ function setResult(isMatch, docId, hash) {
   `;
 }
 
-verifyForm.addEventListener("submit", async (e) => {
+verifyForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const docIdInput = document.getElementById(docIdInputId);
-  const hashInput = document.getElementById(hashInputId);
-  const fileInput = document.getElementById(fileInputId);
+  const docIdInput = document.getElementById("docIdInput");
+  const hashInput = document.getElementById("hashInput");
+  const fileInput = document.getElementById("fileInput");
 
   const docId = docIdInput.value.trim();
   if (!docId) {
@@ -79,22 +72,11 @@ verifyForm.addEventListener("submit", async (e) => {
   }
 });
 
-(async () => {
-  const user = await getSessionUser();
-  if (user) {
-    const role = getUserRole(user);
-    if (role === "admin") {
-      setAdminNav();
-    } else {
-      setStudentNav();
-    }
-  } else {
-    setStudentNav();
-  }
+navLogout?.addEventListener("click", async () => {
+  await signOut();
+  window.location.href = "signin.html";
+});
 
-  navLogout?.classList.add("uc-button", "secondary");
-  navLogout?.addEventListener("click", async () => {
-    await signOut();
-    window.location.href = "signin.html";
-  });
+(async () => {
+  await setupUserContext();
 })();
