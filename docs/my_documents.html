@@ -9,19 +9,19 @@
 </head>
 <body>
   <nav class="triton-nav">
-    <ul>
-      <li><a href="signin.html">Sign In</a></li>
+    <ul id="nav-links">
       <li><a href="my_documents.html" class="active">Profile</a></li>
       <li><a href="request.html">Request</a></li>
       <li><a href="verify.html">Verify</a></li>
     </ul>
     <div class="auth-right">
-      <button id="nav-logout" class="secondary" type="button">Sign Out</button>
+      <button id="walletButton" class="wallet-button hidden">Connect Wallet</button>
+      <button id="nav-logout" class="uc-button secondary" type="button">Sign Out</button>
     </div>
   </nav>
 
   <main class="container">
-    <h1>Student Dashboard</h1>
+    <h1>Student Profile</h1>
     <p>Review your requested documents and your local history.</p>
 
     <section class="home-section quick-actions">
@@ -71,3 +71,4 @@
   <script type="module" src="js/myDocumentsPage.js"></script>
 </body>
 </html>
+

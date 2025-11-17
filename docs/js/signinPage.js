@@ -1,15 +1,8 @@
-﻿import { supabase, signIn, getSessionUser, getUserRole, onAuthChange } from "./supabaseClient.js";
+﻿import { supabase, signIn, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
 
 const form = document.getElementById("signin-form");
 const emailInput = document.getElementById("login-email");
 const passwordInput = document.getElementById("login-password");
-const authStatus = document.getElementById("auth-status");
-
-function setStatus(text, kind = "") {
-  if (!authStatus) return;
-  authStatus.textContent = text;
-  authStatus.className = `status ${kind}`.trim();
-}
 
 function redirectByRole(user) {
   const role = getUserRole(user);
@@ -23,32 +16,23 @@ function redirectByRole(user) {
 form?.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!supabase) {
-    setStatus("Supabase config missing", "error");
+    alert("Supabase config missing");
     return;
   }
   try {
     await signIn(emailInput.value, passwordInput.value);
     const user = await getSessionUser();
     if (user) {
-      setStatus("Signed in", "success");
       redirectByRole(user);
     }
   } catch (err) {
-    setStatus(err.message || err, "error");
-  }
-});
-
-onAuthChange((user) => {
-  if (user) {
-    setStatus(`Signed in as ${user.email}`, "success");
-  } else {
-    setStatus("Not signed in", "muted");
+    alert(err.message || err);
   }
 });
 
 (async () => {
-  const user = await getSessionUser();
-  if (user) {
-    redirectByRole(user);
+  // Clear any remembered session so users always sign in after reopening
+  if (supabase) {
+    await signOut();
   }
 })();

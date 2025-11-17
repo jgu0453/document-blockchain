@@ -10,22 +10,37 @@ const statusEl = document.getElementById("status");
 const detailsEl = document.getElementById("details");
 const resultSection = document.getElementById("result");
 const navLogout = document.getElementById("nav-logout");
+const navLinks = document.getElementById("nav-links");
+let walletBound = false;
 
-async function ensureAdmin() {
-  const user = await getSessionUser();
-  if (!user || getUserRole(user) !== "admin") {
-    window.location.href = "signin.html";
-    return null;
-  }
-  return user;
-}
-
-function enableWallet() {
+function setAdminNav() {
+  if (!navLinks) return;
+  navLinks.innerHTML = `
+    <li><a href="admin.html">Profile</a></li>
+    <li><a href="faculty_staff.html">Register</a></li>
+    <li><a href="verify.html" class="active">Verify</a></li>
+    <li><a href="request.html">Request</a></li>
+  `;
   const btn = document.getElementById(walletButtonId);
-  if (btn) {
+  if (btn && !walletBound) {
     btn.classList.remove("hidden", "disabled");
     btn.disabled = false;
     bindWalletButton(btn);
+    walletBound = true;
+  }
+}
+
+function setStudentNav() {
+  if (!navLinks) return;
+  navLinks.innerHTML = `
+    <li><a href="my_documents.html">Profile</a></li>
+    <li><a href="request.html">Request</a></li>
+    <li><a href="verify.html" class="active">Verify</a></li>
+  `;
+  const btn = document.getElementById(walletButtonId);
+  if (btn) {
+    btn.classList.add("hidden", "disabled");
+    btn.disabled = true;
   }
 }
 
@@ -65,9 +80,19 @@ verifyForm.addEventListener("submit", async (e) => {
 });
 
 (async () => {
-  const user = await ensureAdmin();
-  if (!user) return;
-  enableWallet();
+  const user = await getSessionUser();
+  if (user) {
+    const role = getUserRole(user);
+    if (role === "admin") {
+      setAdminNav();
+    } else {
+      setStudentNav();
+    }
+  } else {
+    setStudentNav();
+  }
+
+  navLogout?.classList.add("uc-button", "secondary");
   navLogout?.addEventListener("click", async () => {
     await signOut();
     window.location.href = "signin.html";
