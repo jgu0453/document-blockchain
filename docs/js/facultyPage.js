@@ -4,14 +4,13 @@ import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient
 const walletButton = document.getElementById("walletButton");
 let walletBound = false;
 
-function ensureAdminOrRedirect() {
-  return getSessionUser().then((user) => {
-    if (!user || getUserRole(user) !== "admin") {
-      window.location.href = "signin.html";
-      return null;
-    }
-    return user;
-  });
+async function ensureAdminOrRedirect() {
+  const user = await getSessionUser();
+  if (!user || getUserRole(user) !== "admin") {
+    window.location.href = "signin.html";
+    return null;
+  }
+  return user;
 }
 
 function enableWalletForAdmin() {
@@ -23,11 +22,6 @@ function enableWalletForAdmin() {
   }
 }
 
-document.getElementById("nav-logout")?.addEventListener("click", async () => {
-  await signOut();
-  window.location.href = "signin.html";
-});
-
 function showError(statusEl, message) {
   statusEl.textContent = message;
 }
@@ -36,6 +30,11 @@ function showError(statusEl, message) {
   const user = await ensureAdminOrRedirect();
   if (!user) return;
   enableWalletForAdmin();
+
+  document.getElementById("nav-logout")?.addEventListener("click", async () => {
+    await signOut();
+    window.location.href = "signin.html";
+  });
 
   const docIdInput = document.getElementById("docIdInput");
   const fileInput = document.getElementById("fileInput");

@@ -1,13 +1,15 @@
-﻿import { rememberDocument, verifyDocument } from "./registry.js";
+﻿import { rememberDocument, verifyDocument, bindWalletButton } from "./registry.js";
 import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
 
-const disableWalletButton = () => {
-  const btn = document.getElementById("walletButton");
-  if (btn) {
-    btn.disabled = true;
-    btn.classList.add("hidden", "disabled");
-  }
-};
+const walletButtonId = "walletButton";
+const fileInputId = "fileInput";
+const docIdInputId = "docIdInput";
+const hashInputId = "hashInput";
+const verifyForm = document.getElementById("verifyForm");
+const statusEl = document.getElementById("status");
+const detailsEl = document.getElementById("details");
+const resultSection = document.getElementById("result");
+const navLogout = document.getElementById("nav-logout");
 
 async function ensureAdmin() {
   const user = await getSessionUser();
@@ -18,15 +20,14 @@ async function ensureAdmin() {
   return user;
 }
 
-const walletButton = document.getElementById("walletButton");
-const navLogout = document.getElementById("nav-logout");
-const fileInputId = "fileInput";
-const docIdInputId = "docIdInput";
-const hashInputId = "hashInput";
-const verifyForm = document.getElementById("verifyForm");
-const statusEl = document.getElementById("status");
-const detailsEl = document.getElementById("details");
-const resultSection = document.getElementById("result");
+function enableWallet() {
+  const btn = document.getElementById(walletButtonId);
+  if (btn) {
+    btn.classList.remove("hidden", "disabled");
+    btn.disabled = false;
+    bindWalletButton(btn);
+  }
+}
 
 function setResult(isMatch, docId, hash) {
   resultSection.classList.remove("hidden");
@@ -64,9 +65,9 @@ verifyForm.addEventListener("submit", async (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
-  disableWalletButton();
   const user = await ensureAdmin();
   if (!user) return;
+  enableWallet();
   navLogout?.addEventListener("click", async () => {
     await signOut();
     window.location.href = "signin.html";

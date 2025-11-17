@@ -16,23 +16,21 @@
   </nav>
 
   <main class="container home">
-    <h1>Sign In</h1>
-    <p class="lead">Use your campus email. Role determines where you land.</p>
-
     <section class="home-section auth-card">
-      <div class="auth-grid">
+      <h1>Sign In</h1>
+      <p class="muted">Use your campus email. Role determines where you land.</p>
+      <form id="signin-form" class="auth-grid">
         <label>Email
-          <input id="login-email" type="email" placeholder="name@ucsd.edu" />
+          <input id="login-email" type="email" placeholder="name@ucsd.edu" required />
         </label>
         <label>Password
-          <input id="login-password" type="password" placeholder="••••••••" />
+          <input id="login-password" type="password" placeholder="••••••••" required />
         </label>
         <div class="auth-actions">
-          <button id="login-btn" type="button">Sign In</button>
-          <button id="logout-btn" type="button" class="secondary">Sign Out</button>
+          <button id="login-btn" type="submit">Sign In</button>
         </div>
         <div id="auth-status" class="status muted">Not signed in</div>
-      </div>
+      </form>
     </section>
   </main>
 

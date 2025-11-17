@@ -1,4 +1,4 @@
-﻿import { supabase, getSessionUser, signOut } from "./supabaseClient.js";
+﻿import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const logoutBtn = document.getElementById("nav-logout");
@@ -10,7 +10,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const user = await getSessionUser();
-  if (user && logoutBtn) {
-    logoutBtn.classList.remove("hidden");
+  if (user) {
+    const role = getUserRole(user);
+    if (role === "admin") {
+      window.location.href = "admin.html";
+    } else if (role === "student") {
+      window.location.href = "my_documents.html";
+    }
   }
 });

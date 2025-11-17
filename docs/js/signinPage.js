@@ -1,12 +1,12 @@
-﻿import { supabase, signIn, signOut, getSessionUser, getUserRole, onAuthChange } from "./supabaseClient.js";
+﻿import { supabase, signIn, getSessionUser, getUserRole, onAuthChange } from "./supabaseClient.js";
 
+const form = document.getElementById("signin-form");
 const emailInput = document.getElementById("login-email");
 const passwordInput = document.getElementById("login-password");
-const loginBtn = document.getElementById("login-btn");
-const logoutBtn = document.getElementById("logout-btn");
 const authStatus = document.getElementById("auth-status");
 
 function setStatus(text, kind = "") {
+  if (!authStatus) return;
   authStatus.textContent = text;
   authStatus.className = `status ${kind}`.trim();
 }
@@ -20,24 +20,22 @@ function redirectByRole(user) {
   }
 }
 
-loginBtn?.addEventListener("click", async () => {
+form?.addEventListener("submit", async (e) => {
+  e.preventDefault();
   if (!supabase) {
     setStatus("Supabase config missing", "error");
     return;
   }
   try {
     await signIn(emailInput.value, passwordInput.value);
-    setStatus("Signed in", "success");
     const user = await getSessionUser();
-    if (user) redirectByRole(user);
+    if (user) {
+      setStatus("Signed in", "success");
+      redirectByRole(user);
+    }
   } catch (err) {
     setStatus(err.message || err, "error");
   }
-});
-
-logoutBtn?.addEventListener("click", async () => {
-  await signOut();
-  setStatus("Signed out", "muted");
 });
 
 onAuthChange((user) => {
@@ -51,6 +49,6 @@ onAuthChange((user) => {
 (async () => {
   const user = await getSessionUser();
   if (user) {
-    setStatus(`Signed in as ${user.email}`, "success");
+    redirectByRole(user);
   }
 })();

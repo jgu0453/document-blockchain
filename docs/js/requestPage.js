@@ -1,8 +1,8 @@
-﻿import { supabase, signIn, signOut, getSessionUser, onAuthChange, getUserRole } from "./supabaseClient.js";
+﻿import { supabase, signIn, signOut, getSessionUser, onAuthChange } from "./supabaseClient.js";
 import { createRequest, listMyRequests } from "./requestsApi.js";
 
 const loginBtn = document.getElementById("login-btn");
-const logoutBtn = document.getElementById("logout-btn") || document.getElementById("nav-logout");
+const logoutBtn = document.getElementById("nav-logout") || document.getElementById("logout-btn");
 const emailInput = document.getElementById("login-email");
 const passwordInput = document.getElementById("login-password");
 const authStatus = document.getElementById("auth-status");
@@ -17,9 +17,9 @@ function showStatus(el, text, kind = "") {
   el.className = `status ${kind}`.trim();
 }
 
-async function ensureStudent() {
+async function ensureSignedIn() {
   const user = await getSessionUser();
-  if (!user || getUserRole(user) !== "student") {
+  if (!user) {
     window.location.href = "signin.html";
     return null;
   }
@@ -57,7 +57,7 @@ function bindAuth() {
     try {
       await signIn(emailInput.value, passwordInput.value);
       showStatus(authStatus, "Signed in", "success");
-      const user = await ensureStudent();
+      const user = await ensureSignedIn();
       if (user) refreshRequests();
     } catch (err) {
       showStatus(authStatus, err.message || err, "error");
@@ -106,7 +106,7 @@ async function init() {
     showStatus(authStatus, "Supabase config missing (add supabase-config.js)", "error");
     return;
   }
-  const user = await ensureStudent();
+  const user = await ensureSignedIn();
   if (!user) return;
   showStatus(authStatus, `Signed in as ${user.email}`, "success");
   bindAuth();
