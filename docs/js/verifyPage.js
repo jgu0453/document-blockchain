@@ -17,7 +17,7 @@ function hideWallet() {
 
 function setResult(isMatch, docId, hash) {
   resultSection.classList.remove("hidden");
-  statusEl.textContent = isMatch ? "✔ Blockchain record matches." : "✖ No matching record found.";
+  statusEl.textContent = isMatch ? "Blockchain record matches." : "No matching record found.";
   detailsEl.innerHTML = `
     <dt>Document ID</dt><dd>${docId}</dd>
     <dt>Hash</dt><dd class="hash">${hash}</dd>
@@ -56,11 +56,11 @@ navLogout?.addEventListener("click", async () => {
   window.location.href = "signin.html";
 });
 
-hideWallet();
-
 (async () => {
   const user = await getSessionUser();
   if (!user) {
     window.location.href = "signin.html";
+    return;
   }
+  hideWallet(); // verify is read-only
 })();

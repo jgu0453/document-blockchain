@@ -1,4 +1,4 @@
-﻿import { supabase, signIn, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
+import { supabase, signIn, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
 
 const form = document.getElementById("signin-form");
 const emailInput = document.getElementById("login-email");
@@ -10,15 +10,18 @@ function redirectByRole(user) {
     window.location.href = "admin.html";
   } else if (role === "student") {
     window.location.href = "my_documents.html";
+  } else {
+    alert("Your account does not have a valid role. Please contact support.");
   }
 }
 
 form?.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!supabase) {
-    alert("Supabase config missing");
+    alert("Supabase configuration is missing.");
     return;
   }
+
   try {
     await signIn(emailInput.value, passwordInput.value);
     const user = await getSessionUser();
@@ -30,9 +33,13 @@ form?.addEventListener("submit", async (e) => {
   }
 });
 
+// Require manual sign-in every visit: clear any remembered session on page load.
 (async () => {
-  // Clear any existing session when loading sign-in so users must sign in each visit
-  if (supabase) {
-    await signOut();
+  try {
+    if (supabase) {
+      await signOut();
+    }
+  } catch (err) {
+    console.warn("Sign-out on load failed:", err);
   }
 })();

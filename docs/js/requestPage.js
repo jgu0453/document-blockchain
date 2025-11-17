@@ -1,11 +1,10 @@
-﻿import { rememberDocument, verifyDocument } from "./registry.js";
-import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
+﻿import { supabase, getSessionUser, signOut } from "./supabaseClient.js";
 
 const form = document.getElementById("request-form");
 const messageEl = document.getElementById("request-message");
 const resultEl = document.getElementById("my-requests");
-const walletButton = document.getElementById("walletButton");
 const navLogout = document.getElementById("nav-logout");
+const walletButton = document.getElementById("walletButton");
 
 function hideWallet() {
   if (walletButton) {
@@ -39,7 +38,7 @@ form?.addEventListener("submit", async (e) => {
   try {
     const { data: row, error } = await supabase
       .from("requests")
-      .select("file_url, doc_hash")
+      .select("file_url")
       .eq("doc_id", docId)
       .eq("status", "issued")
       .limit(1)
@@ -48,22 +47,7 @@ form?.addEventListener("submit", async (e) => {
       setResult("No document found in the database.", "error");
       return;
     }
-    // Optional on-chain verify
-    if (row.doc_hash) {
-      try {
-        const { match } = await verifyDocument({ docId, docHash: row.doc_hash });
-        if (!match) {
-          setResult("Hash mismatch: stored file does not match on-chain.", "error");
-          return;
-        }
-      } catch {
-        // Ignore on-chain errors for download
-      }
-    }
     setResult(`<a href="${row.file_url}" target="_blank" rel="noopener">Download Document</a>`, "success");
-    if (row.doc_hash) {
-      rememberDocument({ docId, docHash: row.doc_hash, verifiedAt: new Date().toISOString() });
-    }
   } catch (err) {
     setResult(err.message || err, "error");
   }
@@ -78,8 +62,5 @@ navLogout?.addEventListener("click", async () => {
 (async () => {
   const user = await ensureSignedIn();
   if (!user) return;
-  const role = getUserRole(user);
-  if (role !== "admin") {
-    hideWallet();
-  }
+  hideWallet(); // Request page does not need wallet
 })();
