@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -12,7 +12,9 @@
       <li><a href="index.html">Home</a></li>
       <li><a href="verify.html">Verify a Document</a></li>
       <li><a href="my_documents.html" class="active">My Documents</a></li>
+      <li><a href="request.html">Request</a></li>
       <li><a href="faculty_staff.html">Faculty/Staff</a></li>
+      <li><a href="admin.html">Admin</a></li>
       <li class="wallet">
         <button id="walletButton" class="wallet-button">Connect Wallet</button>
       </li>
@@ -20,7 +22,18 @@
   </nav>
 
   <main class="container">
-    <h1>Recent Activity</h1>
+    <h1>Student Dashboard</h1>
+    <p>Review your requested documents and your local history.</p>
+
+    <section class="home-section quick-actions">
+      <h2>Quick Links</h2>
+      <div class="action-grid">
+        <a class="uc-button" href="request.html">Request a Document</a>
+        <a class="uc-button" href="verify.html">Verify a Document</a>
+      </div>
+    </section>
+
+    <h2>Recent Activity</h2>
     <p>
       Your browser keeps a private record of documents you register or verify. Use the controls below to re-run
       verification or remove entries from this device.
@@ -28,7 +41,7 @@
 
     <section id="historySection" class="history-section">
       <header class="history-header">
-        <h2>Stored Documents</h2>
+        <h3>Stored Documents</h3>
         <button id="clearHistoryBtn" class="uc-button subtle">Clear All</button>
       </header>
 

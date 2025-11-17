@@ -1,0 +1,53 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Document</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="supabase-config.js"></script>
+</head>
+<body class="page request-page">
+  <header class="topbar">
+    <div class="logo">Document Chain</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="verify.html">Verify</a>
+      <a class="active" href="request.html">Request</a>
+      <a href="my_documents.html">My Documents</a>
+      <a href="faculty_staff.html">Admin</a>
+    </nav>
+    <div class="auth-controls">
+      <input id="login-email" type="email" placeholder="email">
+      <input id="login-password" type="password" placeholder="password">
+      <button id="login-btn">Login</button>
+      <button id="logout-btn" class="secondary">Logout</button>
+      <span id="auth-status"></span>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="card">
+      <h2>Submit a Document Request</h2>
+      <p class="muted">Students can request transcripts/diplomas here. Admins handle issuance after approval.</p>
+      <form id="request-form">
+        <label>Document Type
+          <input name="docType" required placeholder="Transcript, Diploma, etc.">
+        </label>
+        <label>Notes (optional)
+          <textarea name="notes" placeholder="Include term, program, or other details"></textarea>
+        </label>
+        <button type="submit">Submit Request</button>
+      </form>
+      <div id="request-message" class="status"></div>
+    </section>
+
+    <section class="card">
+      <h2>My Requests</h2>
+      <div id="my-requests" class="list"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/requestPage.js"></script>
+</body>
+</html>

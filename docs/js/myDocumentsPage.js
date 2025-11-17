@@ -1,104 +1,103 @@
-import {
+﻿import {
   bindWalletButton,
-  clearRememberedDocuments,
-  getRememberedDocuments,
+  formatAddress,
   rememberDocument,
   removeRememberedDocument,
-  verifyDocument
+  getRememberedDocuments,
+  verifyDocument,
 } from "./registry.js";
 
-const setupWalletButton = () => bindWalletButton(document.getElementById("walletButton"));
+const walletButton = document.getElementById("walletButton");
+const setupWalletButton = () => {
+  if (walletButton) {
+    // Students shouldn't connect wallet here; disable the button.
+    walletButton.disabled = true;
+    walletButton.textContent = "Admin-only wallet";
+    walletButton.classList.add("disabled");
+  }
+};
 
+const clearBtn = document.getElementById("clearHistoryBtn");
+const historyTable = document.getElementById("historyTable");
+const verifyResult = document.getElementById("verifyResult");
+const verifyStatus = document.getElementById("verifyStatus");
+const verifyDetails = document.getElementById("verifyDetails");
+let currentHistory = [];
 
-document.addEventListener("DOMContentLoaded", () => {
-  setupWalletButton();
+function renderHistory() {
+  const tbody = historyTable.querySelector("tbody");
+  tbody.innerHTML = "";
+  if (!currentHistory.length) {
+    const row = document.createElement("tr");
+    row.className = "placeholder";
+    const cell = document.createElement("td");
+    cell.colSpan = 4;
+    cell.textContent = "No documents stored yet. Register or verify a document to see it here.";
+    row.appendChild(cell);
+    tbody.appendChild(row);
+    return;
+  }
 
-  const tableBody = document.querySelector("#historyTable tbody");
-  const resultBox = document.getElementById("verifyResult");
-  const statusEl = document.getElementById("verifyStatus");
-  const detailsEl = document.getElementById("verifyDetails");
-  const clearBtn = document.getElementById("clearHistoryBtn");
+  currentHistory.forEach((item, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${item.docId}</td>
+      <td class="hash">${item.docHash}</td>
+      <td>${new Date(item.registeredAt || item.verifiedAt || Date.now()).toLocaleString()}</td>
+      <td class="actions">
+        <button data-action="verify" data-index="${index}">Verify</button>
+        <button data-action="remove" data-index="${index}" class="secondary">Remove</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
 
-  const renderRows = () => {
-    const docs = getRememberedDocuments();
-    tableBody.innerHTML = "";
-    if (!docs.length) {
-      const row = document.createElement("tr");
-      row.classList.add("placeholder");
-      row.innerHTML = `<td colspan="4">No documents stored yet. Register or verify a document to see it here.</td>`;
-      tableBody.appendChild(row);
-      return;
-    }
+function showResult(match, entry) {
+  verifyResult.classList.remove("hidden");
+  verifyStatus.textContent = match ? "✅ Blockchain record matches." : "❌ No matching record found.";
+  verifyDetails.innerHTML = `
+    <dt>Document ID</dt><dd>${entry.docId}</dd>
+    <dt>Hash</dt><dd>${entry.docHash}</dd>
+  `;
+}
 
-    docs.forEach((entry) => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${entry.docId}</td>
-        <td class="hash">${entry.docHash}</td>
-        <td>${formatTimestamp(entry)}</td>
-        <td class="actions">
-          <button class="uc-button inline" data-action="verify">Verify</button>
-          <button class="uc-button inline subtle" data-action="remove">Remove</button>
-        </td>
-      `;
+async function handleTableClick(e) {
+  const action = e.target.dataset.action;
+  const idx = Number(e.target.dataset.index);
+  if (Number.isNaN(idx)) return;
+  const entry = currentHistory[idx];
+  if (!entry) return;
 
-      row.querySelector('[data-action="verify"]').addEventListener("click", async () => {
-        await handleVerify(entry);
-      });
+  if (action === "remove") {
+    removeRememberedDocument(entry.docId, entry.docHash);
+    currentHistory = getRememberedDocuments();
+    renderHistory();
+    return;
+  }
 
-      row.querySelector('[data-action="remove"]').addEventListener("click", () => {
-        removeRememberedDocument(entry.docId, entry.docHash);
-        renderRows();
-      });
-
-      tableBody.appendChild(row);
-    });
-  };
-
-  const handleVerify = async (entry) => {
-    resultBox.classList.remove("hidden");
-    statusEl.textContent = "Verifying document...";
-    detailsEl.innerHTML = "";
-
+  if (action === "verify") {
     try {
-      const result = await verifyDocument({ docId: entry.docId, docHash: entry.docHash });
-      const now = new Date().toLocaleString();
-
-      detailsEl.innerHTML = `
-        <dt>Document ID</dt><dd>${result.docId}</dd>
-        <dt>Document Hash</dt><dd class="hash">${result.docHash}</dd>
-        <dt>Checked At</dt><dd>${now}</dd>
-      `;
-
-      if (result.match) {
-        statusEl.textContent = "? Blockchain record matches.";
-        rememberDocument({ ...entry, verifiedAt: new Date().toISOString() });
-        renderRows();
-      } else {
-        statusEl.textContent = "?? No matching record found.";
-      }
-    } catch (error) {
-      console.error(error);
-      statusEl.textContent = `? ${error.message ?? error}`;
+      const { match } = await verifyDocument({ docId: entry.docId, docHash: entry.docHash });
+      showResult(match, entry);
+    } catch (err) {
+      alert(err.message || err);
     }
-  };
+  }
+}
 
-  clearBtn.addEventListener("click", () => {
-    clearRememberedDocuments();
-    renderRows();
-    resultBox.classList.add("hidden");
+function init() {
+  setupWalletButton();
+  currentHistory = getRememberedDocuments();
+  renderHistory();
+
+  clearBtn?.addEventListener("click", () => {
+    localStorage.clear();
+    currentHistory = [];
+    renderHistory();
   });
 
-  const formatTimestamp = (entry) => {
-    if (entry.registeredAt) {
-      return `Registered ${new Date(entry.registeredAt).toLocaleString()}`;
-    }
-    if (entry.verifiedAt) {
-      return `Verified ${new Date(entry.verifiedAt).toLocaleString()}`;
-    }
-    return "�";
-  };
+  historyTable?.addEventListener("click", handleTableClick);
+}
 
-  renderRows();
-});
-
+init();

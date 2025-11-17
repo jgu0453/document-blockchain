@@ -1,0 +1,3 @@
+﻿// Supabase project configuration.
+window.SUPABASE_URL = "https://sdhvuzwcfcdbonbzarlo.supabase.co";
+window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkaHZ1endjZmNkYm9uYnphcmxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzNDAxOTMsImV4cCI6MjA3ODkxNjE5M30.XHSElxTzASNGDZIQbyl4Kee12tjYivWp-GuBl2bqnqA";

@@ -1,9 +1,9 @@
-import { bindWalletButton, rememberDocument, verifyDocument } from "./registry.js";
+﻿import { rememberDocument, verifyDocument } from "./registry.js";
 
-const setupWalletButton = () => bindWalletButton(document.getElementById("walletButton"));
+const disableWalletButton = () => { const btn = document.getElementById("walletButton"); if (btn) { btn.disabled = true; btn.textContent = "Admin-only wallet"; btn.classList.add("disabled"); } };
 
 document.addEventListener("DOMContentLoaded", () => {
-  setupWalletButton();
+  disableWalletButton();
 
   const docIdInput = document.getElementById("docIdInput");
   const methodSelect = document.getElementById("methodSelect");
@@ -100,3 +100,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
