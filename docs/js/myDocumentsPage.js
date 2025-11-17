@@ -1,19 +1,16 @@
-﻿import {
-  rememberDocument,
-  removeRememberedDocument,
-  getRememberedDocuments,
-  verifyDocument,
-} from "./registry.js";
+import { verifyDocument } from "./registry.js";
 import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
+import { listDocumentsByStudent } from "./documentsApi.js";
 
 const walletButton = document.getElementById("walletButton");
-const clearBtn = document.getElementById("clearHistoryBtn");
+const refreshBtn = document.getElementById("clearHistoryBtn");
 const historyTable = document.getElementById("historyTable");
 const verifyResult = document.getElementById("verifyResult");
 const verifyStatus = document.getElementById("verifyStatus");
 const verifyDetails = document.getElementById("verifyDetails");
 const navLogout = document.getElementById("nav-logout");
-let currentHistory = [];
+let documents = [];
+let studentId = null;
 
 function disableWalletButton() {
   if (walletButton) {
@@ -23,89 +20,96 @@ function disableWalletButton() {
   }
 }
 
-async function ensureStudent() {
+async function ensureStudentWithId() {
   const user = await getSessionUser();
   if (!user || getUserRole(user) !== "student") {
     window.location.href = "signin.html";
     return null;
   }
+  const sid = user.user_metadata?.studentId;
+  if (!sid) {
+    alert("Your account is missing a student ID. Please contact an admin.");
+    return null;
+  }
+  studentId = sid;
   return user;
 }
 
-function renderHistory() {
+function renderDocuments() {
   const tbody = historyTable.querySelector("tbody");
   tbody.innerHTML = "";
-  if (!currentHistory.length) {
+  if (!documents.length) {
     const row = document.createElement("tr");
     row.className = "placeholder";
     const cell = document.createElement("td");
     cell.colSpan = 4;
-    cell.textContent = "No documents stored yet. Register or verify a document to see it here.";
+    cell.textContent = "No documents found for your account.";
     row.appendChild(cell);
     tbody.appendChild(row);
     return;
   }
 
-  currentHistory.forEach((item, index) => {
+  documents.forEach((item, index) => {
+    const issued = item.issued_at ? new Date(item.issued_at).toLocaleString() : "-";
+    const txLink = item.tx_hash
+      ? `<a href="https://sepolia.etherscan.io/tx/${item.tx_hash}" target="_blank" rel="noopener">Tx</a>`
+      : "";
+    const downloadLink = item.file_url
+      ? `<a href="${item.file_url}" target="_blank" rel="noopener">Download</a>`
+      : "";
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${item.docId}</td>
-      <td class="hash">${item.docHash}</td>
-      <td>${new Date(item.registeredAt || item.verifiedAt || Date.now()).toLocaleString()}</td>
+      <td>${item.doc_id}</td>
+      <td class="hash">${item.doc_hash}</td>
+      <td>${issued}</td>
       <td class="actions">
         <button data-action="verify" data-index="${index}">Verify</button>
-        <button data-action="remove" data-index="${index}" class="secondary">Remove</button>
+        ${downloadLink ? `<span class="dot"></span>${downloadLink}` : ""}
+        ${txLink ? `<span class="dot"></span>${txLink}` : ""}
       </td>
     `;
     tbody.appendChild(row);
   });
 }
 
-function showResult(match, entry) {
-  verifyResult.classList.remove("hidden");
-  verifyStatus.textContent = match ? "Blockchain record matches." : "No matching record found.";
-  verifyDetails.innerHTML = `
-    <dt>Document ID</dt><dd>${entry.docId}</dd>
-    <dt>Hash</dt><dd>${entry.docHash}</dd>
-  `;
-}
-
 async function handleTableClick(e) {
   const action = e.target.dataset.action;
   const idx = Number(e.target.dataset.index);
-  if (Number.isNaN(idx)) return;
-  const entry = currentHistory[idx];
+  if (Number.isNaN(idx) || action !== "verify") return;
+  const entry = documents[idx];
   if (!entry) return;
-
-  if (action === "remove") {
-    removeRememberedDocument(entry.docId, entry.docHash);
-    currentHistory = getRememberedDocuments();
-    renderHistory();
-    return;
+  try {
+    const { match } = await verifyDocument({ docId: entry.doc_id, docHash: entry.doc_hash });
+    verifyResult.classList.remove("hidden");
+    verifyStatus.textContent = match ? "Blockchain record matches." : "No matching record found.";
+    verifyDetails.innerHTML = `
+      <dt>Document ID</dt><dd>${entry.doc_id}</dd>
+      <dt>Hash</dt><dd>${entry.doc_hash}</dd>
+    `;
+  } catch (err) {
+    alert(err.message || err);
   }
+}
 
-  if (action === "verify") {
-    try {
-      const { match } = await verifyDocument({ docId: entry.docId, docHash: entry.docHash });
-      showResult(match, entry);
-    } catch (err) {
-      alert(err.message || err);
-    }
+async function loadDocuments() {
+  try {
+    documents = await listDocumentsByStudent(studentId);
+    renderDocuments();
+  } catch (err) {
+    alert(err.message || err);
   }
 }
 
 async function init() {
   disableWalletButton();
-  const user = await ensureStudent();
+  const user = await ensureStudentWithId();
   if (!user) return;
 
-  currentHistory = getRememberedDocuments();
-  renderHistory();
+  await loadDocuments();
 
-  clearBtn?.addEventListener("click", () => {
-    localStorage.clear();
-    currentHistory = [];
-    renderHistory();
+  refreshBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    loadDocuments();
   });
 
   historyTable?.addEventListener("click", handleTableClick);

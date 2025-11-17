@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -22,7 +22,7 @@
 
   <main class="container">
     <h1>Student Profile</h1>
-    <p>Review your requested documents and your local history.</p>
+    <p>Documents below come from the database for your student ID. No browser history is stored.</p>
 
     <section class="home-section quick-actions">
       <h2>Quick Links</h2>
@@ -32,16 +32,15 @@
       </div>
     </section>
 
-    <h2>Recent Activity</h2>
+    <h2>Your Documents</h2>
     <p>
-      Your browser keeps a private record of documents you register or verify. Use the controls below to re-run
-      verification or remove entries from this device.
+      These records were issued to your account. You can verify on-chain or download from storage.
     </p>
 
     <section id="historySection" class="history-section">
       <header class="history-header">
-        <h3>Stored Documents</h3>
-        <button id="clearHistoryBtn" class="uc-button subtle">Clear All</button>
+        <h3>Issued Documents</h3>
+        <button id="clearHistoryBtn" class="uc-button subtle">Refresh</button>
       </header>
 
       <table id="historyTable" class="doc-table">
@@ -49,13 +48,13 @@
           <tr>
             <th>Document ID</th>
             <th>Hash</th>
-            <th>Last Action</th>
+            <th>Issued At</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr class="placeholder">
-            <td colspan="4">No documents stored yet. Register or verify a document to see it here.</td>
+            <td colspan="4">No documents found for your account.</td>
           </tr>
         </tbody>
       </table>
@@ -71,5 +70,3 @@
   <script type="module" src="js/myDocumentsPage.js"></script>
 </body>
 </html>
-
-
