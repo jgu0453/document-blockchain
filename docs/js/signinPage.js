@@ -32,14 +32,3 @@ form?.addEventListener("submit", async (e) => {
     alert(err.message || err);
   }
 });
-
-// Require manual sign-in every visit: clear any remembered session on page load.
-(async () => {
-  try {
-    if (supabase) {
-      await signOut();
-    }
-  } catch (err) {
-    console.warn("Sign-out on load failed:", err);
-  }
-})();
