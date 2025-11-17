@@ -5,14 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Request Document</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="supabase-config.js"></script>
+  
 </head>
 <body class="page request-page">
   <nav class="triton-nav">
-    <ul id="nav-links">
-      <li><a href="signin.html">Sign In</a></li>
-      <li><a href="my_documents.html" class="active">Profile</a></li>
-      <li><a href="request.html">Request</a></li>
+    <ul>
+      <li><a href="my_documents.html">Profile</a></li>
+      <li><a href="request.html" class="active">Request</a></li>
       <li><a href="verify.html">Verify</a></li>
     </ul>
     <div class="auth-right">
@@ -23,22 +22,21 @@
 
   <main class="content container">
     <section class="card">
-      <h2>Submit a Document Request</h2>
-      <p class="muted">Students can request transcripts/diplomas here. Admins handle issuance after approval.</p>
+      <h2>Request / Check a Document</h2><p class="muted">Enter the document ID and hash to check whether it is recorded on-chain.</p>
       <form id="request-form">
-        <label>Document Type
-          <input name="docType" required placeholder="Transcript, Diploma, etc.">
+        <label>Document ID
+          <input name="docId" required placeholder="e.g., degree-2025-A12345678">
         </label>
-        <label>Notes (optional)
-          <textarea name="notes" placeholder="Include term, program, or other details"></textarea>
+        <label>Document Hash
+          <input name="docHash" required placeholder="0x... (SHA-256)">
         </label>
-        <button type="submit" class="uc-button primary">Submit Request</button>
+        <button type="submit" class="uc-button primary">Check</button>
       </form>
       <div id="request-message" class="status"></div>
     </section>
 
     <section class="card">
-      <h2>My Requests</h2>
+      <h2>Result</h2>
       <div id="my-requests" class="list"></div>
     </section>
   </main>
@@ -46,4 +44,5 @@
   <script type="module" src="js/requestPage.js"></script>
 </body>
 </html>
+
 
