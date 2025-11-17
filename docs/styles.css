@@ -142,7 +142,7 @@ main.container {
   gap: 0.35rem;
   padding: 0.75rem 1.4rem;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #234e70;
   color: #ffffff;
   font-weight: 600;
@@ -203,7 +203,7 @@ select {
   width: 100%;
   padding: 0.7rem 0.9rem;
   border: 1px solid #cbd5ea;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 1rem;
   background: #ffffff;
 }
@@ -221,7 +221,7 @@ input[type="file"] {
 
 .result-box {
   margin-top: 2rem;
-  padding: 1.5rem;
+  padding: 1.75rem;
   border: 1px solid rgba(35, 78, 112, 0.18);
   border-radius: 12px;
   background: rgba(35, 78, 112, 0.05);
@@ -345,11 +345,11 @@ input[type="file"] {
 .signin-card {
   max-width: 520px;
   margin: 1.5rem auto;
-  padding: 1.5rem;
+  padding: 1.75rem;
   background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  border: 1px solid #e3e8ef;
+  border-radius: 12px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
 }
 
 .signin-actions {
@@ -372,3 +372,59 @@ input[type="file"] {
 }
 
 
+
+
+/* Auth layout */
+.auth-page {
+  background: radial-gradient(circle at 20% 20%, rgba(0, 118, 190, 0.08), transparent 30%),
+              radial-gradient(circle at 80% 0%, rgba(0, 51, 102, 0.1), transparent 25%),
+              #f7f9fc;
+  min-height: 100vh;
+}
+
+.auth-layout {
+  max-width: 1100px;
+  margin: 2rem auto 3rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  align-items: start;
+  padding: 0 1rem;
+}
+
+.auth-copy {
+  padding: 1.75rem;
+}
+
+.auth-copy h1 {
+  font-size: 2rem;
+  margin: 0.5rem 0;
+}
+
+.auth-bullets {
+  margin: 1rem 0 0;
+  padding-left: 1.2rem;
+  color: #334155;
+}
+
+.auth-bullets li + li {
+  margin-top: 0.35rem;
+}
+
+.signin-card .pill {
+  display: inline-block;
+  background: #e6f2ff;
+  color: #0b68c6;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.signin-card .card-header h2 {
+  margin: 0.5rem 0 0.25rem;
+}
+
+.signin-card .card-header {
+  margin-bottom: 0.75rem;
+}

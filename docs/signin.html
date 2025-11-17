@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="supabase-config.js"></script>
 </head>
-<body>
+<body class="auth-page">
   <nav class="triton-nav">
     <ul>
       <li><a href="index.html">Home</a></li>
@@ -15,10 +15,24 @@
     </ul>
   </nav>
 
-  <main class="container home">
+  <main class="auth-layout">
+    <section class="auth-copy">
+      <p class="eyebrow">UCSD Document Registry</p>
+      <h1>Sign in to continue</h1>
+      <p class="muted">Admins issue and verify; students view their issued credentials and verify on-chain.</p>
+      <ul class="auth-bullets">
+        <li>Role-based dashboards</li>
+        <li>On-chain verification with Sepolia</li>
+        <li>Secure file retrieval via Supabase</li>
+      </ul>
+    </section>
+
     <section class="signin-card">
-      <h1>Sign In</h1>
-      <p class="muted">Use your campus email. Admins go to the admin dashboard; students go to their profile.</p>
+      <div class="card-header">
+        <div class="pill">Secure Access</div>
+        <h2>Campus credentials</h2>
+        <p class="muted">Use your campus email and password. Sessions are per tab for security.</p>
+      </div>
       <form id="signin-form" class="auth-grid">
         <label>Email
           <input id="login-email" type="email" placeholder="name@ucsd.edu" required />
@@ -30,6 +44,7 @@
           <button id="login-btn" class="uc-button primary" type="submit">Sign In</button>
         </div>
       </form>
+      <p class="microcopy muted">Problems signing in? Contact the registry admin.</p>
     </section>
   </main>
 
