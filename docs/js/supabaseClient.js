@@ -7,7 +7,7 @@ if (!url || !anonKey) {
   console.warn("Supabase config missing. Add docs/supabase-config.js with URL and anon key.");
 }
 
-export const supabase = url && anonKey ? createClient(url, anonKey, { auth: { persistSession: false } }) : null;
+export const supabase = url && anonKey ? createClient(url, anonKey, { auth: { persistSession: true, storage: typeof window !== "undefined" ? window.sessionStorage : undefined } }) : null;
 
 export async function getSessionUser() {
   if (!supabase) return null;
