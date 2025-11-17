@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Request Document (Admin)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="supabase-config.js"></script>
+</head>
+<body class="page request-page">
+  <nav class="triton-nav">
+    <ul>
+      <li><a href="admin.html">Profile</a></li>
+      <li><a href="faculty_staff.html">Register</a></li>
+      <li><a href="admin_verify.html">Verify</a></li>
+      <li><a href="admin_request.html" class="active">Request</a></li>
+    </ul>
+    <div class="auth-right">
+      <button id="walletButton" class="wallet-button">Connect Wallet</button>
+      <button id="nav-logout" class="uc-button secondary" type="button">Sign Out</button>
+    </div>
+  </nav>
+
+  <main class="content container">
+    <section class="card">
+      <h2>Request / Download Document</h2>
+      <p class="muted">Enter the document ID to fetch the stored file from the database. No wallet needed.</p>
+      <form id="request-form">
+        <label>Document ID
+          <input name="docId" required placeholder="e.g., degree-2025-A12345678">
+        </label>
+        <button type="submit" class="uc-button primary">Fetch</button>
+      </form>
+      <div id="request-message" class="status"></div>
+    </section>
+
+    <section class="card">
+      <h2>Result</h2>
+      <div id="my-requests" class="list"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/requestPage.js"></script>
+</body>
+</html>
