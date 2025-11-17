@@ -1,9 +1,41 @@
-import { bindWalletButton, registerDocument } from "./registry.js";
-const setupWalletButton = () => bindWalletButton(document.getElementById("walletButton"));
+﻿import { bindWalletButton, registerDocument } from "./registry.js";
+import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
 
+const walletButton = document.getElementById("walletButton");
+let walletBound = false;
 
-document.addEventListener("DOMContentLoaded", () => {
-  setupWalletButton();
+function ensureAdminOrRedirect() {
+  return getSessionUser().then((user) => {
+    if (!user || getUserRole(user) !== "admin") {
+      window.location.href = "signin.html";
+      return null;
+    }
+    return user;
+  });
+}
+
+function enableWalletForAdmin() {
+  if (walletButton && !walletBound) {
+    walletButton.classList.remove("hidden", "disabled");
+    walletButton.disabled = false;
+    bindWalletButton(walletButton);
+    walletBound = true;
+  }
+}
+
+document.getElementById("nav-logout")?.addEventListener("click", async () => {
+  await signOut();
+  window.location.href = "signin.html";
+});
+
+function showError(statusEl, message) {
+  statusEl.textContent = message;
+}
+
+(async () => {
+  const user = await ensureAdminOrRedirect();
+  if (!user) return;
+  enableWalletForAdmin();
 
   const docIdInput = document.getElementById("docIdInput");
   const fileInput = document.getElementById("fileInput");
@@ -62,8 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
       uriInput.value = "";
     } catch (error) {
       console.error(error);
-      statusEl.textContent = `❌ ${error.message ?? error}`;
+      showError(statusEl, `Error: ${error.message ?? error}`);
     }
   });
-});
-
+})();

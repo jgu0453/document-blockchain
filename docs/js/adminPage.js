@@ -1,16 +1,19 @@
 ﻿import { supabase, signIn, signOut, getSessionUser, onAuthChange, getUserRole } from "./supabaseClient.js";
 import { listPendingRequests, updateRequestStatus } from "./requestsApi.js";
-import { registerDocument, hashFile } from "./registry.js";
+import { registerDocument, hashFile, bindWalletButton } from "./registry.js";
 
 const loginBtn = document.getElementById("login-btn");
-const logoutBtn = document.getElementById("logout-btn");
+const logoutBtn = document.getElementById("logout-btn") || document.getElementById("nav-logout");
 const emailInput = document.getElementById("login-email");
 const passwordInput = document.getElementById("login-password");
 const authStatus = document.getElementById("auth-status");
 const warningEl = document.getElementById("admin-warning");
 const listEl = document.getElementById("pending-requests");
+const walletButton = document.getElementById("walletButton");
+let walletBound = false;
 
 function showStatus(el, text, kind = "") {
+  if (!el) return;
   el.textContent = text;
   el.className = `status ${kind}`.trim();
 }
@@ -19,7 +22,19 @@ function guardAdmin(user) {
   const role = getUserRole(user);
   const ok = role === "admin";
   warningEl?.classList.toggle("hidden", ok);
+  if (!ok) {
+    window.location.href = "signin.html";
+  }
   return ok;
+}
+
+function enableWalletForAdmin() {
+  if (walletButton && !walletBound) {
+    walletButton.classList.remove("hidden", "disabled");
+    walletButton.disabled = false;
+    bindWalletButton(walletButton);
+    walletBound = true;
+  }
 }
 
 async function refresh() {
@@ -28,6 +43,7 @@ async function refresh() {
     listEl.innerHTML = "<p class='muted'>Admin role required.</p>";
     return;
   }
+  enableWalletForAdmin();
   try {
     const rows = await listPendingRequests();
     if (!rows.length) {
@@ -65,7 +81,11 @@ function bindAuth() {
     try {
       await signIn(emailInput.value, passwordInput.value);
       showStatus(authStatus, "Signed in", "success");
-      refresh();
+      const user = await getSessionUser();
+      if (user && guardAdmin(user)) {
+        enableWalletForAdmin();
+        refresh();
+      }
     } catch (err) {
       showStatus(authStatus, err.message || err, "error");
     }
@@ -75,15 +95,16 @@ function bindAuth() {
     await signOut();
     showStatus(authStatus, "Signed out", "muted");
     listEl.innerHTML = "";
+    window.location.href = "signin.html";
   });
 
   onAuthChange((user) => {
     if (user) {
       showStatus(authStatus, `Signed in as ${user.email}`, "success");
-      refresh();
+      guardAdmin(user);
+      enableWalletForAdmin();
     } else {
       showStatus(authStatus, "Not signed in", "muted");
-      listEl.innerHTML = "";
     }
   });
 }
@@ -116,9 +137,7 @@ function bindListActions() {
     try {
       const docId = crypto.randomUUID();
       const docHashHex = await hashFile(file);
-      // On-chain register
       const { txHash } = await registerDocument({ docId, file });
-      // Upload file to Supabase Storage
       const path = `${id}/${file.name}`;
       const { error: uploadError } = await supabase.storage.from("documents").upload(path, file, {
         cacheControl: "3600",
@@ -143,22 +162,18 @@ function bindListActions() {
   });
 }
 
-function init() {
+async function init() {
   if (!supabase) {
     showStatus(authStatus, "Supabase config missing (add supabase-config.js)", "error");
     return;
   }
+  const user = await getSessionUser();
+  if (!user || !guardAdmin(user)) return;
+  enableWalletForAdmin();
+  showStatus(authStatus, `Signed in as ${user.email}`, "success");
   bindAuth();
   bindListActions();
-  getSessionUser().then((user) => {
-    if (user) {
-      showStatus(authStatus, `Signed in as ${user.email}`, "success");
-      guardAdmin(user);
-      refresh();
-    } else {
-      showStatus(authStatus, "Not signed in", "muted");
-    }
-  });
+  refresh();
 }
 
 init();

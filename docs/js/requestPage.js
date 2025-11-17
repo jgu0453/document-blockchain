@@ -1,8 +1,8 @@
-﻿import { supabase, signIn, signOut, getSessionUser, onAuthChange } from "./supabaseClient.js";
+﻿import { supabase, signIn, signOut, getSessionUser, onAuthChange, getUserRole } from "./supabaseClient.js";
 import { createRequest, listMyRequests } from "./requestsApi.js";
 
 const loginBtn = document.getElementById("login-btn");
-const logoutBtn = document.getElementById("logout-btn");
+const logoutBtn = document.getElementById("logout-btn") || document.getElementById("nav-logout");
 const emailInput = document.getElementById("login-email");
 const passwordInput = document.getElementById("login-password");
 const authStatus = document.getElementById("auth-status");
@@ -12,8 +12,18 @@ const messageEl = document.getElementById("request-message");
 const myRequestsEl = document.getElementById("my-requests");
 
 function showStatus(el, text, kind = "") {
+  if (!el) return;
   el.textContent = text;
   el.className = `status ${kind}`.trim();
+}
+
+async function ensureStudent() {
+  const user = await getSessionUser();
+  if (!user || getUserRole(user) !== "student") {
+    window.location.href = "signin.html";
+    return null;
+  }
+  return user;
 }
 
 async function refreshRequests() {
@@ -47,7 +57,8 @@ function bindAuth() {
     try {
       await signIn(emailInput.value, passwordInput.value);
       showStatus(authStatus, "Signed in", "success");
-      refreshRequests();
+      const user = await ensureStudent();
+      if (user) refreshRequests();
     } catch (err) {
       showStatus(authStatus, err.message || err, "error");
     }
@@ -57,15 +68,14 @@ function bindAuth() {
     await signOut();
     showStatus(authStatus, "Signed out", "muted");
     myRequestsEl.innerHTML = "";
+    window.location.href = "signin.html";
   });
 
   onAuthChange((user) => {
     if (user) {
       showStatus(authStatus, `Signed in as ${user.email}`, "success");
-      refreshRequests();
     } else {
       showStatus(authStatus, "Not signed in", "muted");
-      myRequestsEl.innerHTML = "";
     }
   });
 }
@@ -91,21 +101,17 @@ function bindForm() {
   });
 }
 
-function init() {
+async function init() {
   if (!supabase) {
     showStatus(authStatus, "Supabase config missing (add supabase-config.js)", "error");
     return;
   }
+  const user = await ensureStudent();
+  if (!user) return;
+  showStatus(authStatus, `Signed in as ${user.email}`, "success");
   bindAuth();
   bindForm();
-  getSessionUser().then((user) => {
-    if (user) {
-      showStatus(authStatus, `Signed in as ${user.email}`, "success");
-      refreshRequests();
-    } else {
-      showStatus(authStatus, "Not signed in", "muted");
-    }
-  });
+  refreshRequests();
 }
 
 init();

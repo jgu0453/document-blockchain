@@ -1,32 +1,25 @@
-﻿<!doctype html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Request Document</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
   <script src="supabase-config.js"></script>
 </head>
 <body class="page request-page">
-  <header class="topbar">
-    <div class="logo">Document Chain</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="verify.html">Verify</a>
-      <a class="active" href="request.html">Request</a>
-      <a href="my_documents.html">My Documents</a>
-      <a href="faculty_staff.html">Admin</a>
-    </nav>
-    <div class="auth-controls">
-      <input id="login-email" type="email" placeholder="email">
-      <input id="login-password" type="password" placeholder="password">
-      <button id="login-btn">Login</button>
-      <button id="logout-btn" class="secondary">Logout</button>
-      <span id="auth-status"></span>
+  <nav class="triton-nav">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="my_documents.html">Profile</a></li>
+      <li><a href="request.html" class="active">Request</a></li>
+    </ul>
+    <div class="auth-right">
+      <button id="nav-logout" class="secondary" type="button">Sign Out</button>
     </div>
-  </header>
+  </nav>
 
-  <main class="content">
+  <main class="content container">
     <section class="card">
       <h2>Submit a Document Request</h2>
       <p class="muted">Students can request transcripts/diplomas here. Admins handle issuance after approval.</p>

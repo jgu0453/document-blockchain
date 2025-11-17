@@ -10,13 +10,11 @@
   <nav class="triton-nav">
     <ul>
       <li><a href="index.html" class="active">Home</a></li>
-      <li><a href="verify.html">Verify a Document</a></li>
-      <li><a href="my_documents.html">My Documents</a></li>
-      <li><a href="faculty_staff.html">Faculty/Staff</a></li>
-      <li class="wallet">
-        <button id="walletButton" class="wallet-button">Connect Wallet</button>
-      </li>
+      <li><a href="signin.html">Sign In</a></li>
     </ul>
+    <div class="auth-right">
+      <button id="nav-logout" class="secondary hidden" type="button">Sign Out</button>
+    </div>
   </nav>
 
   <main class="container home">
@@ -30,19 +28,10 @@
     <section class="home-section">
       <h2>How It Works</h2>
       <ol>
-        <li>Connect an Ethereum wallet (MetaMask or compatible) using the button above.</li>
-        <li>Ensure your wallet is on the <strong>Sepolia</strong> test network and funded with test ETH.</li>
-        <li>Faculty can register document hashes; anyone can verify by uploading a file or supplying a hash.</li>
+        <li>Admins connect an Ethereum wallet on Sepolia to issue credentials.</li>
+        <li>Students request documents off-chain; admins issue on-chain when approved.</li>
+        <li>Anyone can verify by uploading a file or supplying a hash.</li>
       </ol>
-    </section>
-
-    <section class="home-section quick-actions">
-      <h2>Get Started</h2>
-      <div class="action-grid">
-        <a class="uc-button primary" href="verify.html">Verify a Document</a>
-        <a class="uc-button" href="faculty_staff.html">Register a Document</a>
-        <a class="uc-button" href="my_documents.html">Review My Documents</a>
-      </div>
     </section>
 
     <section class="home-section info">
@@ -51,24 +40,6 @@
         We store only SHA-256 hashes of documents on-chain, creating immutable proofs of existence. Anyone with the
         original file can recompute its fingerprint and verify ownership, while the contents remain private.
       </p>
-    </section>
-
-    <section class="home-section auth-card">
-      <h2>Sign In</h2>
-      <p class="muted">Use your campus email. Admins and students are redirected to their dashboards.</p>
-      <div class="auth-grid">
-        <label>Email
-          <input id="login-email" type="email" placeholder="name@ucsd.edu" />
-        </label>
-        <label>Password
-          <input id="login-password" type="password" placeholder="••••••••" />
-        </label>
-        <div class="auth-actions">
-          <button id="login-btn" type="button">Sign In</button>
-          <button id="logout-btn" type="button" class="secondary">Sign Out</button>
-        </div>
-        <div id="auth-status" class="status muted">Not signed in</div>
-      </div>
     </section>
   </main>
 

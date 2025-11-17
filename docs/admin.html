@@ -8,23 +8,19 @@
   <script src="supabase-config.js"></script>
 </head>
 <body class="page admin-page">
-  <header class="topbar">
-    <div class="logo">Document Chain</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="verify.html">Verify</a>
-      <a href="request.html">Request</a>
-      <a href="my_documents.html">My Documents</a>
-      <a class="active" href="admin.html">Admin</a>
-    </nav>
-    <div class="auth-controls">
-      <input id="login-email" type="email" placeholder="email">
-      <input id="login-password" type="password" placeholder="password">
-      <button id="login-btn">Login</button>
-      <button id="logout-btn" class="secondary">Logout</button>
-      <span id="auth-status"></span>
+  <nav class="triton-nav">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="admin.html" class="active">Profile</a></li>
+      <li><a href="faculty_staff.html">Register</a></li>
+      <li><a href="verify.html">Verify</a></li>
+      <li><a href="request.html">Request</a></li>
+    </ul>
+    <div class="auth-right">
+      <button id="walletButton" class="wallet-button hidden">Connect Wallet</button>
+      <button id="nav-logout" class="secondary" type="button">Sign Out</button>
     </div>
-  </header>
+  </nav>
 
   <main class="content">
     <section class="card">

@@ -1,103 +1,74 @@
 ﻿import { rememberDocument, verifyDocument } from "./registry.js";
+import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
 
-const disableWalletButton = () => { const btn = document.getElementById("walletButton"); if (btn) { btn.disabled = true; btn.textContent = "Admin-only wallet"; btn.classList.add("disabled"); } };
+const disableWalletButton = () => {
+  const btn = document.getElementById("walletButton");
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("hidden", "disabled");
+  }
+};
 
-document.addEventListener("DOMContentLoaded", () => {
-  disableWalletButton();
+async function ensureAdmin() {
+  const user = await getSessionUser();
+  if (!user || getUserRole(user) !== "admin") {
+    window.location.href = "signin.html";
+    return null;
+  }
+  return user;
+}
 
-  const docIdInput = document.getElementById("docIdInput");
-  const methodSelect = document.getElementById("methodSelect");
-  const fileInputGroup = document.getElementById("fileInputGroup");
-  const hashInputGroup = document.getElementById("hashInputGroup");
-  const fileInput = document.getElementById("fileInput");
-  const hashInput = document.getElementById("hashInput");
-  const verifyBtn = document.getElementById("verifyBtn");
-  const clearBtn = document.getElementById("clearBtn");
-  const resultSection = document.getElementById("result");
-  const statusEl = document.getElementById("status");
-  const detailsEl = document.getElementById("details");
+const walletButton = document.getElementById("walletButton");
+const navLogout = document.getElementById("nav-logout");
+const fileInputId = "fileInput";
+const docIdInputId = "docIdInput";
+const hashInputId = "hashInput";
+const verifyForm = document.getElementById("verifyForm");
+const statusEl = document.getElementById("status");
+const detailsEl = document.getElementById("details");
+const resultSection = document.getElementById("result");
 
-  methodSelect.addEventListener("change", () => {
-    const method = methodSelect.value;
-    fileInputGroup.classList.toggle("hidden", method !== "file");
-    hashInputGroup.classList.toggle("hidden", method !== "hash");
-    if (method === "file") {
-      hashInput.value = "";
-    } else if (method === "hash") {
-      fileInput.value = "";
-    }
-  });
+function setResult(isMatch, docId, hash) {
+  resultSection.classList.remove("hidden");
+  statusEl.textContent = isMatch ? "✔ Blockchain record matches." : "✖ No matching record found.";
+  detailsEl.innerHTML = `
+    <dt>Document ID</dt><dd>${docId}</dd>
+    <dt>Hash</dt><dd class="hash">${hash}</dd>
+  `;
+}
 
-  const resetForm = () => {
-    docIdInput.value = "";
-    methodSelect.value = "";
-    fileInput.value = "";
-    hashInput.value = "";
-    fileInputGroup.classList.add("hidden");
-    hashInputGroup.classList.add("hidden");
-    resultSection.classList.add("hidden");
-    detailsEl.innerHTML = "";
-  };
+verifyForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  clearBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-    resetForm();
-  });
+  const docIdInput = document.getElementById(docIdInputId);
+  const hashInput = document.getElementById(hashInputId);
+  const fileInput = document.getElementById(fileInputId);
 
-  verifyBtn.addEventListener("click", async (event) => {
-    event.preventDefault();
-    const docId = docIdInput.value.trim();
-    const method = methodSelect.value;
-    const file = fileInput.files[0];
-    const providedHash = hashInput.value.trim();
+  const docId = docIdInput.value.trim();
+  if (!docId) {
+    alert("Document ID is required.");
+    return;
+  }
 
-    resultSection.classList.remove("hidden");
-    statusEl.textContent = "Verifying document...";
-    detailsEl.innerHTML = "";
-
-    try {
-      if (!docId) {
-        throw new Error("Document ID is required.");
-      }
-      if (method === "file" && !file) {
-        throw new Error("Select a document file before verifying.");
-      }
-      if (method === "hash" && !providedHash) {
-        throw new Error("Enter the document hash before verifying.");
-      }
-      if (!method) {
-        throw new Error("Select a verification method.");
-      }
-
-      const result = await verifyDocument({
-        docId,
-        file: method === "file" ? file : undefined,
-        docHash: method === "hash" ? providedHash : undefined
-      });
-
-      const now = new Date().toLocaleString();
-      const methodLabel = method === "file" ? "File Upload" : "Hash Input";
-      detailsEl.innerHTML = `
-        <dt>Document ID</dt><dd>${result.docId}</dd>
-        <dt>Document Hash</dt><dd class="hash">${result.docHash}</dd>
-        <dt>Method</dt><dd>${methodLabel}</dd>
-        <dt>Checked At</dt><dd>${now}</dd>
-      `;
-
-      if (result.match) {
-        statusEl.textContent = "Blockchain record matches.";
-        rememberDocument({
-          docId: result.docId,
-          docHash: result.docHash,
-          verifiedAt: new Date().toISOString()
-        });
-      } else {
-        statusEl.textContent = "No matching record found on-chain.";
-      }
-    } catch (error) {
-      console.error(error);
-      statusEl.textContent = `Error: ${error.message ?? error}`;
-    }
-  });
+  try {
+    const { match, docHash } = await verifyDocument({
+      docId,
+      file: fileInput.files[0] || null,
+      docHash: hashInput.value.trim() || null,
+    });
+    setResult(match, docId, docHash);
+    rememberDocument({ docId, docHash, verifiedAt: new Date().toISOString() });
+  } catch (error) {
+    alert(error.message ?? error);
+  }
 });
 
+document.addEventListener("DOMContentLoaded", async () => {
+  disableWalletButton();
+  const user = await ensureAdmin();
+  if (!user) return;
+  navLogout?.addEventListener("click", async () => {
+    await signOut();
+    window.location.href = "signin.html";
+  });
+});

@@ -1,43 +1,43 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Verify Credential</title>
+  <title>Verify a Document</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="supabase-config.js"></script>
 </head>
 <body>
   <nav class="triton-nav">
     <ul>
       <li><a href="index.html">Home</a></li>
-      <li><a href="verify.html" class="active">Verify a Document</a></li>
-      <li><a href="my_documents.html">My Documents</a></li>
-      <li><a href="faculty_staff.html">Faculty/Staff</a></li>
-      <li class="wallet">
-        <button id="walletButton" class="wallet-button">Connect Wallet</button>
-      </li>
+      <li><a href="admin.html">Profile</a></li>
+      <li><a href="faculty_staff.html">Register</a></li>
+      <li><a href="verify.html" class="active">Verify</a></li>
+      <li><a href="request.html">Request</a></li>
     </ul>
+    <div class="auth-right">
+      <button id="walletButton" class="wallet-button hidden">Connect Wallet</button>
+      <button id="nav-logout" class="secondary" type="button">Sign Out</button>
+    </div>
   </nav>
 
-  <main class="container">
+  <main class="container verify">
     <h1>Verify a Document</h1>
-    <p>
-      Provide the document ID and either upload the file or paste a known file hash. The application recomputes the
-      SHA-256 fingerprint locally and compares it to the on-chain record.
-    </p>
+    <p class="lead">Upload a document or paste a hash to check against the on-chain fingerprint.</p>
 
-    <div class="form-grid">
+    <form id="verifyForm" class="card verify-form">
       <div class="form-group">
         <label for="docIdInput">Document ID</label>
-        <input type="text" id="docIdInput" placeholder="e.g., transcript-2025" autocomplete="off" />
+        <input id="docIdInput" type="text" placeholder="e.g., degree-2025-A12345678" autocomplete="off" />
       </div>
 
       <div class="form-group">
         <label for="methodSelect">Verification Method</label>
         <select id="methodSelect">
-          <option value="">-- Select a Method --</option>
-          <option value="file">Upload Document</option>
-          <option value="hash">Enter Document Hash</option>
+          <option value="" disabled selected>Select a method</option>
+          <option value="file">Upload File</option>
+          <option value="hash">Paste Hash</option>
         </select>
       </div>
 
@@ -47,19 +47,20 @@
       </div>
 
       <div id="hashInputGroup" class="form-group hidden">
-        <label for="hashInput">Document Hash (SHA-256)</label>
-        <input type="text" id="hashInput" placeholder="0x…" autocomplete="off" />
+        <label for="hashInput">Document Hash</label>
+        <input type="text" id="hashInput" placeholder="0x..." autocomplete="off" />
+        <small>Must be a 32-byte hex string (SHA-256).</small>
       </div>
-    </div>
 
-    <div class="form-actions">
-      <button id="verifyBtn" class="uc-button primary">Verify Document</button>
-      <button id="clearBtn" class="uc-button subtle">Clear</button>
-    </div>
+      <div class="form-actions">
+        <button id="verifyBtn" class="uc-button primary">Verify</button>
+        <button id="clearBtn" class="uc-button subtle">Clear</button>
+      </div>
+    </form>
 
     <section id="result" class="result-box hidden" aria-live="polite">
       <h2>Verification Result</h2>
-      <p id="status">Verifying…</p>
+      <p id="status"></p>
       <dl id="details"></dl>
     </section>
   </main>

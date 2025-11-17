@@ -1,28 +1,36 @@
 ﻿import {
-  bindWalletButton,
-  formatAddress,
   rememberDocument,
   removeRememberedDocument,
   getRememberedDocuments,
   verifyDocument,
 } from "./registry.js";
+import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
 
 const walletButton = document.getElementById("walletButton");
-const setupWalletButton = () => {
-  if (walletButton) {
-    // Students shouldn't connect wallet here; disable the button.
-    walletButton.disabled = true;
-    walletButton.textContent = "Admin-only wallet";
-    walletButton.classList.add("disabled");
-  }
-};
-
 const clearBtn = document.getElementById("clearHistoryBtn");
 const historyTable = document.getElementById("historyTable");
 const verifyResult = document.getElementById("verifyResult");
 const verifyStatus = document.getElementById("verifyStatus");
 const verifyDetails = document.getElementById("verifyDetails");
+const navLogout = document.getElementById("nav-logout");
 let currentHistory = [];
+
+function disableWalletButton() {
+  if (walletButton) {
+    walletButton.disabled = true;
+    walletButton.textContent = "Admin-only wallet";
+    walletButton.classList.add("disabled");
+  }
+}
+
+async function ensureStudent() {
+  const user = await getSessionUser();
+  if (!user || getUserRole(user) !== "student") {
+    window.location.href = "signin.html";
+    return null;
+  }
+  return user;
+}
 
 function renderHistory() {
   const tbody = historyTable.querySelector("tbody");
@@ -55,7 +63,7 @@ function renderHistory() {
 
 function showResult(match, entry) {
   verifyResult.classList.remove("hidden");
-  verifyStatus.textContent = match ? "✅ Blockchain record matches." : "❌ No matching record found.";
+  verifyStatus.textContent = match ? "Blockchain record matches." : "No matching record found.";
   verifyDetails.innerHTML = `
     <dt>Document ID</dt><dd>${entry.docId}</dd>
     <dt>Hash</dt><dd>${entry.docHash}</dd>
@@ -86,8 +94,11 @@ async function handleTableClick(e) {
   }
 }
 
-function init() {
-  setupWalletButton();
+async function init() {
+  disableWalletButton();
+  const user = await ensureStudent();
+  if (!user) return;
+
   currentHistory = getRememberedDocuments();
   renderHistory();
 
@@ -98,6 +109,14 @@ function init() {
   });
 
   historyTable?.addEventListener("click", handleTableClick);
+  navLogout?.addEventListener("click", async () => {
+    await signOut();
+    window.location.href = "signin.html";
+  });
 }
 
-init();
+if (supabase) {
+  init();
+} else {
+  disableWalletButton();
+}
