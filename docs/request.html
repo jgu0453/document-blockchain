@@ -9,13 +9,14 @@
 </head>
 <body class="page request-page">
   <nav class="triton-nav">
-    <ul>
+    <ul id="nav-links">
       <li><a href="signin.html">Sign In</a></li>
-      <li><a href="my_documents.html">Profile</a></li>
-      <li><a href="request.html" class="active">Request</a></li>
+      <li><a href="my_documents.html" class="active">Profile</a></li>
+      <li><a href="request.html">Request</a></li>
       <li><a href="verify.html">Verify</a></li>
     </ul>
     <div class="auth-right">
+      <button id="walletButton" class="wallet-button hidden">Connect Wallet</button>
       <button id="nav-logout" class="secondary" type="button">Sign Out</button>
     </div>
   </nav>
@@ -31,7 +32,7 @@
         <label>Notes (optional)
           <textarea name="notes" placeholder="Include term, program, or other details"></textarea>
         </label>
-        <button type="submit">Submit Request</button>
+        <button type="submit" class="uc-button primary">Submit Request</button>
       </form>
       <div id="request-message" class="status"></div>
     </section>

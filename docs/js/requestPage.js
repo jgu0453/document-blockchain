@@ -1,5 +1,6 @@
-﻿import { supabase, signIn, signOut, getSessionUser, onAuthChange } from "./supabaseClient.js";
+﻿import { supabase, signIn, signOut, getSessionUser, onAuthChange, getUserRole } from "./supabaseClient.js";
 import { createRequest, listMyRequests } from "./requestsApi.js";
+import { bindWalletButton } from "./registry.js";
 
 const loginBtn = document.getElementById("login-btn");
 const logoutBtn = document.getElementById("nav-logout") || document.getElementById("logout-btn");
@@ -10,6 +11,9 @@ const authStatus = document.getElementById("auth-status");
 const form = document.getElementById("request-form");
 const messageEl = document.getElementById("request-message");
 const myRequestsEl = document.getElementById("my-requests");
+
+const walletButton = document.getElementById("walletButton");
+const navLinks = document.getElementById("nav-links");
 
 function showStatus(el, text, kind = "") {
   if (!el) return;
@@ -24,6 +28,34 @@ async function ensureSignedIn() {
     return null;
   }
   return user;
+}
+
+function configureNavForRole(role) {
+  if (!navLinks) return;
+  if (role === "admin") {
+    navLinks.innerHTML = `
+      <li><a href="admin.html">Profile</a></li>
+      <li><a href="faculty_staff.html">Register</a></li>
+      <li><a href="verify.html">Verify</a></li>
+      <li><a href="request.html" class="active">Request</a></li>
+    `;
+    if (walletButton) {
+      walletButton.classList.remove("hidden", "disabled");
+      walletButton.disabled = false;
+      bindWalletButton(walletButton);
+    }
+  } else {
+    navLinks.innerHTML = `
+      <li><a href="signin.html">Sign In</a></li>
+      <li><a href="my_documents.html">Profile</a></li>
+      <li><a href="request.html" class="active">Request</a></li>
+      <li><a href="verify.html">Verify</a></li>
+    `;
+    if (walletButton) {
+      walletButton.classList.add("hidden");
+      walletButton.disabled = true;
+    }
+  }
 }
 
 async function refreshRequests() {
@@ -58,7 +90,10 @@ function bindAuth() {
       await signIn(emailInput.value, passwordInput.value);
       showStatus(authStatus, "Signed in", "success");
       const user = await ensureSignedIn();
-      if (user) refreshRequests();
+      if (user) {
+        configureNavForRole(getUserRole(user));
+        refreshRequests();
+      }
     } catch (err) {
       showStatus(authStatus, err.message || err, "error");
     }
@@ -74,6 +109,7 @@ function bindAuth() {
   onAuthChange((user) => {
     if (user) {
       showStatus(authStatus, `Signed in as ${user.email}`, "success");
+      configureNavForRole(getUserRole(user));
     } else {
       showStatus(authStatus, "Not signed in", "muted");
     }
@@ -108,6 +144,8 @@ async function init() {
   }
   const user = await ensureSignedIn();
   if (!user) return;
+  const role = getUserRole(user);
+  configureNavForRole(role);
   showStatus(authStatus, `Signed in as ${user.email}`, "success");
   bindAuth();
   bindForm();

@@ -64,7 +64,7 @@ verifyForm.addEventListener("submit", async (e) => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", async () => {
+(async () => {
   const user = await ensureAdmin();
   if (!user) return;
   enableWallet();
@@ -72,4 +72,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     await signOut();
     window.location.href = "signin.html";
   });
-});
+})();
