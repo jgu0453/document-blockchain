@@ -79,7 +79,14 @@ function showError(statusEl, message) {
       if (!file) throw new Error("Select a document file to register.");
       if (!supabase) throw new Error("Supabase is not configured.");
 
-      const regResult = await registerDocument({ docId, file, uri });
+      const regResult = await registerDocument({
+        docId,
+        file,
+        uri,
+        onTransactionSent: (txHash) => {
+          statusEl.innerHTML = 'Registering document on-chain: <a href="https://sepolia.etherscan.io/tx/' + txHash + '" target="_blank" rel="noopener">' + txHash + '</a>';
+        }
+      });
       const nowIso = new Date().toISOString();
 
       const path = `${docId}/${file.name}`;
