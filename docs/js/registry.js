@@ -10,7 +10,7 @@ const CONTRACT_ABI = [
 const STORAGE_KEY = "doc-registry:documents";
 const SESSION_CONNECTED_KEY = "doc-registry:connected";
 
-function getActiveContractAddress() {
+export function getActiveContractAddress() {
   const params = new URLSearchParams(window.location.search);
   const fromQuery = params.get("contract");
   if (fromQuery) {
@@ -377,6 +377,7 @@ if (window.ethereum) {
 }
 
 restoreWallet();
+
 
 
 

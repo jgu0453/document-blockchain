@@ -1,8 +1,9 @@
-import { bindWalletButton, registerDocument } from "./registry.js";
+import { bindWalletButton, registerDocument, getActiveContractAddress, formatAddress } from "./registry.js";
 import { supabase, getSessionUser, getUserRole, signOut } from "./supabaseClient.js";
 import { insertDocumentRecord } from "./documentsApi.js";
 
 const walletButton = document.getElementById("walletButton");
+const activeRegistry = document.getElementById("activeRegistry");
 let walletBound = false;
 
 async function ensureAdminOrRedirect() {
@@ -27,10 +28,17 @@ function showError(statusEl, message) {
   statusEl.textContent = message;
 }
 
+function showActiveRegistry() {
+  const active = document.getElementById("activeRegistry");
+  if (!active) return;
+  const addr = getActiveContractAddress();
+  active.textContent = addr ? 'Active registry: ' + (formatAddress(addr) || addr) : 'No active registry selected.';
+}
 (async () => {
   const user = await ensureAdminOrRedirect();
   if (!user) return;
   enableWalletForAdmin();
+  showActiveRegistry();
 
   document.getElementById("nav-logout")?.addEventListener("click", async () => {
     await signOut();
@@ -126,3 +134,8 @@ function showError(statusEl, message) {
     }
   });
 })();
+
+
+
+
+

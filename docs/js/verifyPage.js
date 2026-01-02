@@ -1,7 +1,8 @@
-import { rememberDocument, verifyDocument } from "./registry.js";
+import { rememberDocument, verifyDocument, getActiveContractAddress, formatAddress } from "./registry.js";
 import { getSessionUser, signOut } from "./supabaseClient.js";
 
 const walletButton = document.getElementById("walletButton");
+const activeRegistry = document.getElementById("activeRegistry");
 const navLogout = document.getElementById("nav-logout");
 const verifyForm = document.getElementById("verifyForm");
 const clearBtn = document.getElementById("clearBtn");
@@ -22,15 +23,7 @@ function hideWallet() {
   }
 }
 
-function setResult(isMatch, docId, hash) {
-  resultSection.classList.remove("hidden");
-  statusEl.textContent = isMatch ? "Blockchain record matches." : "No matching record found.";
-  detailsEl.innerHTML = `
-    <dt>Document ID</dt><dd>${docId}</dd>
-    <dt>Hash</dt><dd class="hash">${hash}</dd>
-  `;
-}
-
+function setResult(isMatch, docId, hash) {\n  resultSection.classList.remove("hidden");\n  statusEl.textContent = isMatch ? "Blockchain record matches." : "No matching record found.";\n  detailsEl.innerHTML = `\n    <dt>Document ID</dt><dd>${docId}</dd>\n    <dt>Hash</dt><dd class="hash">${hash}</dd>\n  `;\n}\n\nfunction showActiveRegistry() {\n  if (!activeRegistry) return;\n  const addr = getActiveContractAddress();\n  activeRegistry.textContent = addr ? "Active registry: " + (formatAddress(addr) || addr) : "No active registry selected.";\n}\n
 function updateMethodUI(value) {
   const useFile = value === "file";
   const useHash = value === "hash";
@@ -84,10 +77,9 @@ navLogout?.addEventListener("click", async () => {
 
 (async () => {
   const user = await getSessionUser();
-  if (!user) {
-    window.location.href = "signin.html";
-    return;
-  }
-  hideWallet(); // verify is read-only
+  if (!user) {\n    window.location.href = "signin.html";\n    return;\n  }\n  showActiveRegistry();\n  hideWallet(); // verify is read-only
   updateMethodUI(methodSelect?.value || "");
 })();
+
+
+
