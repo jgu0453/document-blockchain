@@ -1,15 +1,22 @@
-ï»¿import { supabase, signIn, signOut, getSessionUser, onAuthChange, getUserRole } from "./supabaseClient.js";
+import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.11.1/dist/ethers.min.js";
+import { supabase, signIn, signOut, getSessionUser, onAuthChange, getUserRole } from "./supabaseClient.js";
 import { listPendingRequests, updateRequestStatus } from "./requestsApi.js";
-import { registerDocument, hashFile, bindWalletButton } from "./registry.js";
+import { registerDocument, hashFile, bindWalletButton, setActiveContractAddress } from "./registry.js";
+import { createDeployment, listDeploymentsByUser } from "./deploymentsApi.js";
 
-const loginBtn = document.getElementById("login-btn");
-const logoutBtn = document.getElementById("logout-btn") || document.getElementById("nav-logout");
-const emailInput = document.getElementById("login-email");
-const passwordInput = document.getElementById("login-password");
-const authStatus = document.getElementById("auth-status");
+const walletButton = document.getElementById("walletButton");
+const logoutBtn = document.getElementById("nav-logout");
 const warningEl = document.getElementById("admin-warning");
 const listEl = document.getElementById("pending-requests");
-const walletButton = document.getElementById("walletButton");
+const authStatus = document.getElementById("auth-status");
+
+const factoryAddressInput = document.getElementById("factoryAddress");
+const deploymentLabelInput = document.getElementById("deploymentLabel");
+const deployBtn = document.getElementById("deployRegistryBtn");
+const deploymentStatus = document.getElementById("deployment-status");
+const deploymentsList = document.getElementById("deployments-list");
+
+const FACTORY_ADDRESS_KEY = "doc-registry:factory";
 let walletBound = false;
 
 function showStatus(el, text, kind = "") {
@@ -37,7 +44,105 @@ function enableWalletForAdmin() {
   }
 }
 
-async function refresh() {
+function getFactoryAddress() {
+  return factoryAddressInput?.value?.trim() || localStorage.getItem(FACTORY_ADDRESS_KEY) || "";
+}
+
+function rememberFactoryAddress(addr) {
+  if (addr) {
+    localStorage.setItem(FACTORY_ADDRESS_KEY, addr);
+  }
+}
+
+async function getSigner() {
+  if (!window.ethereum) {
+    throw new Error("Please install MetaMask or an Ethereum-compatible wallet.");
+  }
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  return provider.getSigner();
+}
+
+function renderDeployments(items) {
+  if (!deploymentsList) return;
+  if (!items.length) {
+    deploymentsList.innerHTML = `<p class="muted">No registries yet. Deploy one above.</p>`;
+    return;
+  }
+  deploymentsList.innerHTML = items
+    .map(
+      (d) => `
+      <div class="list-item">
+        <div>
+          <div class="bold">${d.label || "(no label)"}</div>
+          <div class="muted">${d.contract_address}</div>
+          ${d.created_at ? `<div class="muted">Created: ${new Date(d.created_at).toLocaleString()}</div>` : ""}
+        </div>
+        <div class="actions">
+          <button data-action="use" data-address="${d.contract_address}">Use</button>
+          <a class="secondary" href="admin_verify.html?contract=${d.contract_address}">Verify</a>
+        </div>
+      </div>
+    `
+    )
+    .join("");
+}
+
+async function loadDeployments() {
+  try {
+    const rows = await listDeploymentsByUser();
+    renderDeployments(rows);
+  } catch (err) {
+    renderDeployments([]);
+    console.error(err);
+  }
+}
+
+async function handleDeployRegistry() {
+  try {
+    deploymentStatus && showStatus(deploymentStatus, "Deploying…", "muted");
+    const label = deploymentLabelInput?.value.trim() || "";
+    const factoryAddress = getFactoryAddress();
+    if (!factoryAddress) throw new Error("Factory address is required.");
+
+    const signer = await getSigner();
+    const factoryAbi = [
+      "event RegistryDeployed(address indexed registry, address indexed owner, string label)",
+      "function deployRegistry(string label) returns(address)",
+    ];
+    const factory = new ethers.Contract(factoryAddress, factoryAbi, signer);
+    const tx = await factory.deployRegistry(label);
+    const receipt = await tx.wait();
+
+    let registryAddr = "";
+    const iface = new ethers.Interface(factoryAbi);
+    for (const log of receipt.logs || []) {
+      try {
+        const parsed = iface.parseLog(log);
+        if (parsed?.name === "RegistryDeployed") {
+          registryAddr = parsed.args?.registry;
+          break;
+        }
+      } catch (e) {
+        // ignore non-matching logs
+      }
+    }
+    if (!registryAddr) {
+      throw new Error("Unable to read deployed registry address from transaction.");
+    }
+
+    rememberFactoryAddress(factoryAddress);
+    await createDeployment({ contractAddress: registryAddr, label });
+    setActiveContractAddress(registryAddr);
+    deploymentStatus && showStatus(deploymentStatus, `Deployed ${registryAddr}`, "success");
+    deploymentLabelInput.value = "";
+    await loadDeployments();
+  } catch (err) {
+    deploymentStatus && showStatus(deploymentStatus, err.message || err, "error");
+  }
+}
+
+async function refreshRequests() {
   const { data: user } = await supabase.auth.getUser();
   if (!user?.user || !guardAdmin(user.user)) {
     listEl.innerHTML = "<p class='muted'>Admin role required.</p>";
@@ -76,39 +181,6 @@ async function refresh() {
   }
 }
 
-function bindAuth() {
-  loginBtn?.addEventListener("click", async () => {
-    try {
-      await signIn(emailInput.value, passwordInput.value);
-      showStatus(authStatus, "Signed in", "success");
-      const user = await getSessionUser();
-      if (user && guardAdmin(user)) {
-        enableWalletForAdmin();
-        refresh();
-      }
-    } catch (err) {
-      showStatus(authStatus, err.message || err, "error");
-    }
-  });
-
-  logoutBtn?.addEventListener("click", async () => {
-    await signOut();
-    showStatus(authStatus, "Signed out", "muted");
-    listEl.innerHTML = "";
-    window.location.href = "signin.html";
-  });
-
-  onAuthChange((user) => {
-    if (user) {
-      showStatus(authStatus, `Signed in as ${user.email}`, "success");
-      guardAdmin(user);
-      enableWalletForAdmin();
-    } else {
-      showStatus(authStatus, "Not signed in", "muted");
-    }
-  });
-}
-
 function bindListActions() {
   listEl?.addEventListener("click", async (e) => {
     const btn = e.target.closest("button");
@@ -122,7 +194,7 @@ function bindListActions() {
       } else if (action === "deny") {
         await updateRequestStatus(id, "denied");
       }
-      await refresh();
+      await refreshRequests();
     } catch (err) {
       alert(err.message || err);
     }
@@ -153,11 +225,22 @@ function bindListActions() {
         issued_at: new Date().toISOString(),
       });
       alert("Issued and recorded on-chain.");
-      await refresh();
+      await refreshRequests();
     } catch (err) {
       alert(err.message || err);
     } finally {
       input.value = "";
+    }
+  });
+
+  deploymentsList?.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const addr = btn.dataset.address;
+    if (action === "use" && addr) {
+      setActiveContractAddress(addr);
+      alert(`Active registry set to ${addr}`);
     }
   });
 }
@@ -167,13 +250,38 @@ async function init() {
     showStatus(authStatus, "Supabase config missing (add supabase-config.js)", "error");
     return;
   }
+  if (factoryAddressInput) {
+    factoryAddressInput.value = localStorage.getItem(FACTORY_ADDRESS_KEY) || "";
+  }
   const user = await getSessionUser();
   if (!user || !guardAdmin(user)) return;
   enableWalletForAdmin();
   showStatus(authStatus, `Signed in as ${user.email}`, "success");
-  bindAuth();
+
+  deployBtn?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await handleDeployRegistry();
+  });
+
+  logoutBtn?.addEventListener("click", async () => {
+    await signOut();
+    showStatus(authStatus, "Signed out", "muted");
+    window.location.href = "signin.html";
+  });
+
+  onAuthChange((u) => {
+    if (u) {
+      showStatus(authStatus, `Signed in as ${u.email}`, "success");
+      guardAdmin(u);
+      enableWalletForAdmin();
+    } else {
+      showStatus(authStatus, "Not signed in", "muted");
+    }
+  });
+
   bindListActions();
-  refresh();
+  await refreshRequests();
+  await loadDeployments();
 }
 
 init();

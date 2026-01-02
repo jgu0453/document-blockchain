@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -22,6 +22,32 @@
   </nav>
 
   <main class="content">
+    <div id="auth-status" class="status muted"></div>
+
+    <section class="card">
+      <h2>Deploy a New Registry</h2>
+      <p class="muted">Create a dedicated registry for a use case (e.g., luxury goods, transcripts). Provide the factory address and an optional label. The contract will deploy to the connected wallet network.</p>
+      <div class="form-grid">
+        <label>Factory Address
+          <input id="factoryAddress" type="text" placeholder="0x..." autocomplete="off" />
+          <small>Stored locally after first use.</small>
+        </label>
+        <label>Label (optional)
+          <input id="deploymentLabel" type="text" placeholder="e.g., UCSD-Transcripts" autocomplete="off" />
+        </label>
+      </div>
+      <div class="form-actions">
+        <button id="deployRegistryBtn" class="uc-button primary">Deploy Registry</button>
+      </div>
+      <div id="deployment-status" class="status muted"></div>
+    </section>
+
+    <section class="card">
+      <h2>Your Registries</h2>
+      <p class="muted">Select a registry to make it active for issuing and verification flows.</p>
+      <div id="deployments-list" class="list"></div>
+    </section>
+
     <section class="card">
       <h2>Pending Requests</h2>
       <p class="muted">Admins can approve, deny, or issue documents. Issuance will hash the file and write to the blockchain.</p>
@@ -33,4 +59,3 @@
   <script type="module" src="js/adminPage.js"></script>
 </body>
 </html>
-

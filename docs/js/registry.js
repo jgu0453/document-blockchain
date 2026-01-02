@@ -1,6 +1,7 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.11.1/dist/ethers.min.js";
 
-const CONTRACT_ADDRESS = "0xE8012eB7fA14Db7e83Abfd96ac6fD0D58292AB03";
+const DEFAULT_CONTRACT_ADDRESS = "0xE8012eB7fA14Db7e83Abfd96ac6fD0D58292AB03";
+const CONTRACT_ADDRESS_KEY = "doc-registry:contract";
 const CONTRACT_ABI = [
   "function registerDocument(bytes32 docId, bytes32 docHash, string uri)",
   "function verifyDocument(bytes32 docId, bytes32 docHash) view returns (bool)"
@@ -8,6 +9,26 @@ const CONTRACT_ABI = [
 
 const STORAGE_KEY = "doc-registry:documents";
 const SESSION_CONNECTED_KEY = "doc-registry:connected";
+
+function getActiveContractAddress() {
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get("contract");
+  if (fromQuery) {
+    localStorage.setItem(CONTRACT_ADDRESS_KEY, fromQuery);
+    return fromQuery;
+  }
+  return localStorage.getItem(CONTRACT_ADDRESS_KEY) || DEFAULT_CONTRACT_ADDRESS;
+}
+
+export function setActiveContractAddress(address) {
+  if (!address) {
+    localStorage.removeItem(CONTRACT_ADDRESS_KEY);
+  } else {
+    localStorage.setItem(CONTRACT_ADDRESS_KEY, address);
+  }
+  readContract = null;
+  signerContract = null;
+}
 
 let provider;
 let signer;
@@ -34,7 +55,7 @@ function getDefaultProvider() {
     const readProvider = window.ethereum
       ? new ethers.BrowserProvider(window.ethereum)
       : ethers.getDefaultProvider("sepolia");
-    readContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, readProvider);
+    readContract = new ethers.Contract(getActiveContractAddress(), CONTRACT_ABI, readProvider);
   }
   return readContract;
 }
@@ -57,7 +78,7 @@ async function ensureSignerContract() {
     if (!currentAddress) {
       throw new Error("Connect your wallet before registering documents.");
     }
-    signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    signerContract = new ethers.Contract(getActiveContractAddress(), CONTRACT_ABI, signer);
     readContract = signerContract;
     notifyListeners();
     return signerContract;
@@ -90,7 +111,7 @@ async function restoreWallet() {
     if (!signerContract) {
       provider = provider ?? new ethers.BrowserProvider(window.ethereum);
       signer = await provider.getSigner();
-      signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+      signerContract = new ethers.Contract(getActiveContractAddress(), CONTRACT_ABI, signer);
       readContract = signerContract;
     }
     currentAddress = accounts[0];
@@ -138,7 +159,7 @@ export async function connectWallet() {
     await provider.send("eth_requestAccounts", []);
     signer = await provider.getSigner();
     currentAddress = await signer.getAddress();
-    signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    signerContract = new ethers.Contract(getActiveContractAddress(), CONTRACT_ABI, signer);
     readContract = signerContract;
     setSessionConnected(true);
     notifyListeners();
@@ -337,7 +358,7 @@ if (window.ethereum) {
       try {
         provider = provider ?? new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
-        signerContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+        signerContract = new ethers.Contract(getActiveContractAddress(), CONTRACT_ABI, signer);
         readContract = signerContract;
       } catch (error) {
         disconnectWallet();
@@ -356,6 +377,7 @@ if (window.ethereum) {
 }
 
 restoreWallet();
+
 
 
 

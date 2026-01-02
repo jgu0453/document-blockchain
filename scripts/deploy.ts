@@ -6,8 +6,11 @@ async function main() {
 
   const registry = await ethers.deployContract("DocumentRegistry");
   await registry.waitForDeployment();
-
   console.log(`DocumentRegistry deployed to ${await registry.getAddress()}`);
+
+  const factory = await ethers.deployContract("DocumentRegistryFactory");
+  await factory.waitForDeployment();
+  console.log(`DocumentRegistryFactory deployed to ${await factory.getAddress()}`);
 }
 
 main().catch((error) => {
